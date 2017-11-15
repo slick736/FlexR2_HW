@@ -1113,7 +1113,10 @@ void setLEDWorkBlink(uint8_t workLevel){
   if(workLevel <= SYSTEM_ENERGY_LEVEL1){
     //关机、待机
     ledWorkLevel = 0;
-    pinDark(1);
+    if(isCharging() <= 0){
+      //不在充电状态就灭灯
+      pinDark(1);
+    }
   }else if(workLevel >= SYSTEM_ENERGY_LEVEL2){
     //正常工作
     ledWorkLevel = 2;

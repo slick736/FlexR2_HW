@@ -75,6 +75,8 @@
 #define CHARGE_BLINK_TEST           0
 //测试：是否永久允许不经陀螺仪同意而直接连通（成品应为0）
 #define WORKLEVEL2_WITHOUT_MPU      0
+//测试：永远保持充电/不充电状态，0-不设定 1-永远不充电 2-永远充电（成品应为0）
+#define CHARGE_STATUS_KEEP          0
 
 //被外因挂断后，允许尝试不经陀螺仪同意而自动连接的次数（成品应为10）
 #define CONNECT_WITHOUT_MPU         10

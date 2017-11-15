@@ -1863,7 +1863,7 @@ uint8_t advertEnabled = 0;
 void stopAdvertising(void){
   if(CHARGE_LAMP > 0){
     //灯光响应充电模式
-    if(CHARGE_BLINK_AT_CHARGE <= 0){
+    if(CHARGE_BLINK_AT_CHARGE > 0){
       pinDark(1);
     }
   }else{

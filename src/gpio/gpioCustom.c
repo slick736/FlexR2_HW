@@ -195,6 +195,9 @@ static void clockBlinkJudge(UArg arg){
 //判别是否正处于充电状态
 uint8_t dioCharging = 0;
 uint8_t isCharging(void){
+  if(CHARGE_STATUS_KEEP > 0){
+    return (CHARGE_STATUS_KEEP - 1);
+  }
   if(CHARGE_BLINK_TEST){
     return 1;
   }

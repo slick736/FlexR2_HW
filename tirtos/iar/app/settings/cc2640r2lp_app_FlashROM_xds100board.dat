@@ -2,7 +2,7 @@
 $ sepk
   pod_drvr=jioxds110.dll
   pod_port=0
-  pod_serial=L50000T9
+  pod_serial=L50000TB
 $ /
 $ product
   title="Texas Instruments XDS110 USB"
