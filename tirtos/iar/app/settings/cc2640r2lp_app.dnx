@@ -12,15 +12,15 @@
         <ByteLimit>50</ByteLimit>
     </Stack>
     <XdsDriver>
-        <xds110serialNo>L50000TB</xds110serialNo>
+        <xds110serialNo>00000230</xds110serialNo>
         <xds110foundProbes />
-        <xdsResetStyle>0</xdsResetStyle>
-        <xdsResetStrategy>3</xdsResetStrategy>
         <CStepIntDis>_ 0</CStepIntDis>
         <LeaveTargetRunning>_ 0</LeaveTargetRunning>
+        <xdsResetStyle>0</xdsResetStyle>
+        <xdsResetStrategy>3</xdsResetStrategy>
     </XdsDriver>
     <DebugChecksum>
-        <Checksum>2999213351</Checksum>
+        <Checksum>2549959477</Checksum>
     </DebugChecksum>
     <Exceptions>
         <StopOnUncaught>_ 0</StopOnUncaught>
@@ -45,6 +45,12 @@
     <Disassembly>
         <MixedMode>1</MixedMode>
     </Disassembly>
+    <DisassembleMode>
+        <mode>0</mode>
+    </DisassembleMode>
+    <Breakpoints2>
+        <Count>0</Count>
+    </Breakpoints2>
     <LogFile>
         <LoggingEnabled>_ 0</LoggingEnabled>
         <LogFile>_ ""</LogFile>
@@ -54,18 +60,6 @@
         <LoggingEnabled>_ 0</LoggingEnabled>
         <LogFile>_ ""</LogFile>
     </TermIOLog>
-    <CallStackLog>
-        <Enabled>0</Enabled>
-    </CallStackLog>
-    <CallStackStripe>
-        <ShowTiming>1</ShowTiming>
-    </CallStackStripe>
-    <DisassembleMode>
-        <mode>0</mode>
-    </DisassembleMode>
-    <Breakpoints2>
-        <Count>0</Count>
-    </Breakpoints2>
     <Aliases>
         <A0>_ "C:\Jenkins\jobs\FWGroup-DriverLib\workspace\modules\output\cc26xx_ch2_1_0_ext\driverlib\cpu.c" ""</A0>
         <A1>_ "C:\Jenkins\jobs\FWGroup-DriverLib\workspace\modules\output\cc26xx_ch2_1_0_ext\driverlib\rfc.c" ""</A1>
@@ -74,4 +68,10 @@
         <Count>4</Count>
         <SuppressDialog>1</SuppressDialog>
     </Aliases>
+    <CallStackLog>
+        <Enabled>0</Enabled>
+    </CallStackLog>
+    <CallStackStripe>
+        <ShowTiming>1</ShowTiming>
+    </CallStackStripe>
 </settings>
