@@ -18,4 +18,4 @@ extern void resetLampCount(void);
 extern void pinDark(uint8_t withClockStop);
 extern uint8_t isChargeCompleted(void);
 extern uint8_t isBatteryLow(void);
-extern uint8_t isCharging(void);
+extern uint8_t isCharging(uint8_t liveCheck);

@@ -1197,8 +1197,12 @@ void meDisableBLEConnect(void){
     if(disconnectByInterrupt > 0){
       //是外因挂断的（此时检查是否有蓝牙关闭预告）
       if(bleIsToClose <= 0){
-        //没有预告，即不明原因的断开，则尝试重连
-        enableAutoConnect = CONNECT_WITHOUT_MPU + 1;
+        //没有预告，即不明原因的断开，并且工作状态已达到正2级，则尝试重连
+        if(getSYSTEMWorkLevel() < SYSTEM_ENERGY_LEVEL2){
+          enableAutoConnect = 0;
+        }else{
+          enableAutoConnect = CONNECT_WITHOUT_MPU + 1;
+        }
       }else{
         //有预告，即明确规定被软件人为断开了，则不尝试重连
         enableAutoConnect = 0;
@@ -1210,7 +1214,7 @@ void meDisableBLEConnect(void){
     }
     setSYSTEMWorkLevel(SYSTEM_ENERGY_LEVEL1);
     enableConnectBLE = 0;
-    if(isCharging() <= 0){
+    if(isCharging(0) <= 0){
       //如果不在充电，则关闭灯光
       pinDark(1);
     }
@@ -1297,40 +1301,6 @@ static void SimpleBLEPeripheral_processStateChangeEvt(gaprole_States_t newState)
           lpaLampLoop = PRECONNECT_RETRY_MAX;
         }
         bleStopReason = 1;
-        //停止回归0状态的计时
-        if(REJECT_CONNECT_ON_LOWBATT > 0){
-          if(isCharging() > 0){
-            //充电时，不响应手机搜索
-            terminateConnectionWithDisabled = 1;
-            GAPRole_TerminateConnection();
-            lpaLampLoop = 0;
-            PIN_RLight(); // <-- 亮红灯：表示不能摇晃设备，拒绝一切连接请求
-            disconnectByInterrupt = 0; // <-- 内部原因挂断
-            break;
-          }else if(getBatteryData() <= SHUTDOWN_LOW_VOLTAGE){
-            //若电源电压太低或者处在充电状态中，则不接受连接请求，断开连接（灯也不亮）
-            terminateConnectionWithDisabled = 1;
-            GAPRole_TerminateConnection();
-            lpaLampLoop = 0;
-            pinDark(1); // <-- 灭灯：表示不愿响应任何的连接请求
-            disconnectByInterrupt = 0; // <-- 内部原因挂断
-            break;
-          }
-        }
-        if(WORKLEVEL2_WITHOUT_MPU == 0){
-          //永久性不经陀螺仪同意直接连接？
-          if(enableAutoConnect <= 0){
-            //必须经过陀螺仪同意才能连接
-            if(enableConnectBLE <= 0){
-              //若用户没有拍击设备，且不是长广播状态，亦不接受连接请求，断开连接
-              terminateConnectionWithDisabled = 0;
-              GAPRole_TerminateConnection();
-              PIN_GLight(); // <-- 亮白灯：表示可以摇晃设备，以同意连接
-              disconnectByInterrupt = 0; // <-- 内部原因挂断
-              break;
-            }
-          }
-        }
         linkDBInfo_t linkInfo;
         uint8_t numActive = 0;
         
@@ -1339,8 +1309,14 @@ static void SimpleBLEPeripheral_processStateChangeEvt(gaprole_States_t newState)
         Util_startClock(&periodicClock);
         //接受蓝牙请求，蓝牙连接，进入2级工作状态
         //注意3级工作状态是无法从这里直接进入的，必须先执行EEE3的系统设定
-        setSYSTEMWorkLevel(SYSTEM_ENERGY_LEVEL2);
-        
+        if(enableAutoConnect > 0 || WORKLEVEL2_WITHOUT_MPU > 0){
+          //允许不经陀螺仪直接接通：直接进入2状态
+          enableAutoConnect = 0;
+          setSYSTEMWorkLevel(SYSTEM_ENERGY_LEVEL2);
+        }else{
+          //否则进入准2状态
+          setSYSTEMWorkLevel(SYSTEM_ENERGY_LEVEL2_LPA);
+        }
         //一旦接通，就重置所有1级工况以下使用的变量
         lpaLampLoop = 0;
         terminateConnectionWithDisabled = 1;
@@ -1559,6 +1535,7 @@ static void EulerPeripheral_processCharValueChangeEvt(uint8_t paramID)
 static void SimpleBLEPeripheral_performInitializeTask(void)
 {
   uint8_t i;
+  PIN_GLight();
   //这里处理MPU初始化线程
   if(AXIS_9_FUSION_MODE > 0){
     //9轴模式运行
@@ -1624,6 +1601,17 @@ static void SimpleBLEPeripheral_performInitializeTask(void)
   //需判别初始化阶段，若MPU初始化完毕，则不再生成initializeClock事件
   if(mpuInitializeCount > 0){
     Util_startClock(&initializeClock);
+  }else{
+    if(isCharging(1) > 0){
+      //充电中
+      if(isChargeCompleted() > 0){
+        pinGLightConst();
+      }else{
+        pinRLightConst();
+      }
+    }else{
+      pinDark(1);
+    }
   }
 }
 
@@ -1633,18 +1621,9 @@ uint8_t adcServiceGo = 0;
 uint8_t batterySampleCount = 0;
 uint16_t adcTempResult = 0;
 uint8_t bleCycleCount = 127;
-void forceDisconnectBLE(void)
-{
-  //无论在什么情况下，都会强制挂断蓝牙的方法
-  lpaLampLoop = 0;
-  terminateConnectionWithDisabled = 1;
-  enableConnectBLE = 0;
-  bleStopReason = 1;
-  Util_stopClock(&periodicClock);
-  SimpleBLEPeripheral_freeAttRsp(bleNotConnected);
-  GAPRole_TerminateConnection();
-  meDisableBLEConnect();
-}
+
+extern uint8_t workStatus = 0; // <-- 自身工作状态
+
 //最关键的部分：蓝牙在连通时循环执行的部分
 static void SimpleBLEPeripheral_performPeriodicTask(void)
 {
@@ -1652,20 +1631,21 @@ static void SimpleBLEPeripheral_performPeriodicTask(void)
   uint8_t workLevel;
   uint8_t i;
   uint8_t adcTotalNum;
+  uint8_t batteryIsLow;
+  uint16_t workResult = 0;
   
   long adcSigma;
+  workStatus = WORKING_STATUS_OK; // <-- 工作状态：0为正常
   
-  //是否为低电压挂断模式
+  //是否为低电压请求挂断模式
   if(REJECT_CONNECT_ON_LOWBATT > 0){
-    //检查电源：如果电源电压降至关机电压以下，就强制挂断蓝牙并进入待机状态
+    //检查电源：如果电源电压降至关机电压以下，就请求App端断开连接
     if(getBatteryData() <= SHUTDOWN_LOW_VOLTAGE){
-      forceDisconnectBLE();
-      return;
+      workStatus = WORKING_STATUS_REQUEST_DISCONNECT;
     }
-    //检查充电：如果放在充电器上，同样会强制挂断蓝牙并进入待机状态
-    if(isCharging() > 0){
-      forceDisconnectBLE();
-      return;
+    //检查充电：如果放在充电器上，同样会请求App端断开连接
+    if(isCharging(0) > 0){
+      workStatus = WORKING_STATUS_REQUEST_DISCONNECT;
     }
   }
   
@@ -1674,33 +1654,64 @@ static void SimpleBLEPeripheral_performPeriodicTask(void)
     //屏蔽Motion的运算环节？
     adcServiceGo = 1;
   }
-
-  if(BLE_ACTIVE_INTERVAL > 0){
-    //蓝牙间隔计数上限必须大于零才执行空发数据指令，否则会一直进行运算
-    bleCycleCount += 1;
-    if(bleCycleCount >= BLE_ACTIVE_INTERVAL){
-      //计数到了，可以进行下一步
-      bleCycleCount = 0;
-    }else{
-      //计数没到，仅通知设备进行蓝牙信号发送，但不进行运算
-      if((adcServiceGo % 2) != 0){
-        //肌电空发数据
-        SimpleProfile_SetParameter(SIMPLEPROFILE_CHAR4, sizeof(uint16_t), &adcTempResult);
-      }else{
-        //陀螺仪空发数据
-        XYZEuler_SetParameter(XYZ_EULER_CHAR4, sizeof(uint8_t), &adcServiceGo);
-      }
-      return;
+  
+  //判定系统工况
+  workLevel = getSYSTEMWorkLevel();
+  if(workLevel < SYSTEM_ENERGY_LEVEL2){
+    //系统工况不足2级，就只空发数据而不进行运算
+    if(workStatus == WORKING_STATUS_OK){
+      workStatus = WORKING_STATUS_WAIT_FOR_TAP;
+    }else if(workStatus == WORKING_STATUS_REQUEST_DISCONNECT){
+      workStatus = WORKING_STATUS_DECLINE_CONNECTION;
     }
+    if((adcServiceGo % 2) != 0){
+      //肌电空发数据
+      if(isCharging(0) > 0){
+        //充电中：持续使用充电灯光
+        if(isChargeCompleted() > 0){
+          pinGLightConst();
+        }else{
+          pinRLightConst();
+        }
+      }else{
+        //不在充电中：电池足够就亮灯，否则不亮
+        if(workStatus == WORKING_STATUS_WAIT_FOR_TAP){
+          setLEDWorkBlink(workLevel);
+        }else{
+          pinDark(1);
+        }
+      }
+      adcTempResult = 0;
+      //将工作状态合并到adcTempResult的最高4位
+      workResult = workStatus;
+      adcTempResult += (workResult << 12);
+      SimpleProfile_SetParameter(SIMPLEPROFILE_CHAR4, sizeof(uint16_t), &adcTempResult);
+      adcServiceGo += 1;
+      if(adcServiceGo >= 4){
+        adcServiceGo = 0;
+      }
+    }else{
+      //陀螺仪空发数据
+      XYZEuler_SetParameter(XYZ_EULER_CHAR4, sizeof(uint8_t), &adcServiceGo);
+      adcServiceGo += 1;
+    }
+    //如果发现了连接信号，则在下回进入该方法时，切换到2级状态
+    if(enableConnectBLE > 0){
+      enableConnectBLE = 0;
+      setSYSTEMWorkLevel(SYSTEM_ENERGY_LEVEL2);
+    }
+    return;
   }
   
-  //肌电和陀螺仪交替处理
+  //肌电和陀螺仪交替处理(只有工作状态至少正2级以上才会进入这个方法)
   if((adcServiceGo % 2) != 0){
     //轮到肌电处理
-    //判定系统工况
-    workLevel = getSYSTEMWorkLevel();
-    //判定灯光状态
-    setLEDWorkBlink(workLevel);
+    
+    //判定灯光和电压状态
+    batteryIsLow = setLEDWorkBlink(workLevel);
+    if(workStatus == WORKING_STATUS_OK){
+      workStatus = batteryIsLow;
+    }
     switch(workLevel){
     case SYSTEM_ENERGY_LEVEL2:
       //不在3级水平的工况：肌电数值恒定为0，并且不执行EMG采集工作
@@ -1747,6 +1758,10 @@ static void SimpleBLEPeripheral_performPeriodicTask(void)
     if(adcServiceGo >= 4){
       adcServiceGo = 0;
     }
+    //将工作状态合并到adcTempResult的最高4位
+    workResult = workStatus;
+    adcTempResult += (workResult << 12);
+    //数据传输
     SimpleProfile_SetParameter(SIMPLEPROFILE_CHAR4, sizeof(uint16_t), &adcTempResult);
   }else{
     //轮到陀螺仪处理
@@ -1924,18 +1939,14 @@ void startAdvertising(void){
     }
   }else{
     //充电时周期到达，亮灯
-    if(isCharging() > 0){
+    if(isCharging(1) > 0){
       pinDark(1);
       if(isChargeCompleted() > 0){
         PIN_GLight();
       }else{
         PIN_RLight();
       }
-    }//else if(enableAutoConnect > 0){
-      // <-- 红灯亮：表示本次连接可以不经陀螺仪同意直接唤醒
-      // 或者提示用户：我被断开了，赶紧退回蓝牙信号范围内！
-      //PIN_RLight();
-    //}
+    }
   }
   
   //先进入1级状态再开始广播（使能）

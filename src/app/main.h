@@ -1,8 +1,15 @@
 #define SYSTEM_ENERGY_LEVEL0         0
 #define SYSTEM_ENERGY_LEVEL1         10
 #define SYSTEM_ENERGY_LEVEL1_LPA     15
+#define SYSTEM_ENERGY_LEVEL2_LPA     17
 #define SYSTEM_ENERGY_LEVEL2         20
 #define SYSTEM_ENERGY_LEVEL3         30
+
+#define WORKING_STATUS_OK                    0
+#define WORKING_STATUS_LOW_BATTERY           1
+#define WORKING_STATUS_WAIT_FOR_TAP          8
+#define WORKING_STATUS_DECLINE_CONNECTION    9
+#define WORKING_STATUS_REQUEST_DISCONNECT    15
 
 #define LOW_RX                  0
 #define HIGH_RX                 1
@@ -59,7 +66,7 @@
 //连接相关
 #define CONNECT_RETRY_MAX           2 // <-- 拍击后重试多少个0<->1循环周期
 #define PRECONNECT_RETRY_MAX        5 // <-- 拍击前让LED点亮多少个0<->1循环周期
-#define REJECT_CONNECT_ON_LOWBATT   1 // <-- 是否在电池没电时自动挂断并拒绝再次连接（成品应为1）
+#define REJECT_CONNECT_ON_LOWBATT   1 // <-- 是否在电池没电时请求挂断并拒绝再次连接（成品应为1）
 
 //测试用灯光（成品应为0）
 #define LAMP_TEST_MODE              0
@@ -87,7 +94,7 @@
 extern void setSYSTEMWorkLevel(uint8_t workLevel);
 extern uint8_t getSYSTEMWorkLevel(void);
 extern void enableStandby(uint8_t standbyEnabled);
-extern void setLEDWorkBlink(uint8_t workLevel);
+extern uint8_t setLEDWorkBlink(uint8_t workLevel);
 
 extern int initMPLService(void);
 extern int initMPLService_STEP1(void);

@@ -1020,9 +1020,9 @@ void setSYSTEMWorkLevel(uint8_t workLevel){
   }
   systemWorkLevel = workLevel;
   //改变LED工作状态（如果LPA周期未结束就不变灯）
-  if(getLPALampLoop() <= 0){
-    setLEDWorkBlink(workLevel);
-  }
+  //if(getLPALampLoop() <= 0){
+    //setLEDWorkBlink(workLevel);
+  //}
   switch(workLevel){
   case SYSTEM_ENERGY_LEVEL0:
     //0级工作状态
@@ -1079,6 +1079,17 @@ void setSYSTEMWorkLevel(uint8_t workLevel){
     adcOff();
     emgPortOpen(0);
     break;
+  case SYSTEM_ENERGY_LEVEL2_LPA:
+    //准2级待连接工作状态
+    motionIsOpen = 0;
+    enableStandby(0);
+    if(ENABLE_AUTO_SLEEP == 0){
+      mpuHibernate();
+      mpuIntoLPA();
+    }
+    adcOn();
+    emgPortOpen(0);
+    break;
   case SYSTEM_ENERGY_LEVEL2:
     //2级工作状态
     if(LAMP_TEST_MODE > 0){
@@ -1109,27 +1120,70 @@ uint8_t getSYSTEMWorkLevel(void){
 }
 //即时判断系统应该如何亮灯
 uint8_t ledWorkLevel = 127;
-void setLEDWorkBlink(uint8_t workLevel){
+uint8_t setLEDWorkBlink(uint8_t workLevel){
+  uint8_t batteryIsLow = 0;
   if(workLevel <= SYSTEM_ENERGY_LEVEL1){
     //关机、待机
     ledWorkLevel = 0;
-    if(isCharging() <= 0){
+    if(isCharging(1) <= 0){
       //不在充电状态就灭灯
       pinDark(1);
     }
   }else if(workLevel >= SYSTEM_ENERGY_LEVEL2){
-    //正常工作
     ledWorkLevel = 2;
-    if(isBatteryLow() > 0){
-      pinRLightBlink();
+    if(isCharging(0) > 0){
+      //充电中
+      if(isChargeCompleted() > 0){
+        pinGLightConst();
+      }else{
+        pinRLightConst();
+      }
     }else{
-      pinGLightBlink();
+      //正常工作
+      if(isBatteryLow() > 0){
+        pinRLightBlink();
+        batteryIsLow = 1;
+      }else{
+        pinGLightBlink();
+      }
+    }
+  }else if(workLevel == SYSTEM_ENERGY_LEVEL2_LPA){
+    ledWorkLevel = 1;
+    if(isCharging(0) > 0){
+      //充电中
+      if(isChargeCompleted() > 0){
+        pinGLightConst();
+      }else{
+        pinRLightConst();
+      }
+    }else{
+      //等待拍击
+      if(isBatteryLow() > 0){
+        batteryIsLow = 1;
+        if(getBatteryData() <= SHUTDOWN_LOW_VOLTAGE){
+          pinDark(1);
+        }else{
+          pinGLightConst();
+        }
+      }else{
+        pinGLightConst();
+      }
     }
   }else{
     //1级半特殊处理
     ledWorkLevel = 1;
-    pinGLightConst();
+    if(isCharging(1) > 0){
+      //充电中
+      if(isChargeCompleted() > 0){
+        pinGLightConst();
+      }else{
+        pinRLightConst();
+      }
+    }else{
+      pinGLightConst();
+    }
   }
+  return batteryIsLow;
 }
 
 //注意，这个方法目前写在蓝牙的主循环内，因此MPL的实际采样率不会大于
@@ -1677,6 +1731,11 @@ uint16_t getMPUWakePowerByCalc(void){
 
 //写入系统设定====================================================================
 void setSyetemOption(uint16_t sysOption){
+  //修正BUG：如果系统工作模式不足正2级，则拒绝接受一切指令
+  if(getSYSTEMWorkLevel() < SYSTEM_ENERGY_LEVEL2){
+    return;
+  }
+  
   //MPU唤醒力度多大？
   uint8_t _mpuWakePower = sysOption >> 8;
   setMPUWakePower(_mpuWakePower);

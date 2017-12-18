@@ -140,15 +140,32 @@ void pinDark(uint8_t withClockStop){
   PIN_GDark();
 }
 
-//指令：2级工况刚刚进入时，Reset灯光计数器（刚刚进入2级工况时要点亮2秒）
+//指令：2级工况刚刚进入时，Reset灯光计数器（刚刚进入2级工况时要点亮2秒，除非正在充电）
 extern void resetLampCount(void){
   blinkTimerCount = BATTERY_BLINK_RESET;
   blickProcessing = 1;
   //进入闪烁点亮阶段
-  if(lightIndex == 1){
-    PIN_RLight();
+  if(isCharging(0) > 0){
+    //充电中
+    if(isChargeCompleted() > 0){
+      PIN_GLight();
+    }else{
+      PIN_RLight();
+    }
   }else{
-    PIN_GLight();
+    if(lightIndex == 1){
+      if(isBatteryLow() > 0){
+        pinDark(1);
+      }else{
+        PIN_RLight();
+      }
+    }else{
+      if(isBatteryLow() > 0){
+        pinDark(1);
+      }else{
+        PIN_GLight();
+      }
+    }
   }
   Util_startClock(&blinkClock);
 }
@@ -194,12 +211,16 @@ static void clockBlinkJudge(UArg arg){
 }
 //判别是否正处于充电状态
 uint8_t dioCharging = 0;
-uint8_t isCharging(void){
+uint8_t isCharging(uint8_t liveCheck){
   if(CHARGE_STATUS_KEEP > 0){
     return (CHARGE_STATUS_KEEP - 1);
   }
   if(CHARGE_BLINK_TEST){
     return 1;
+  }
+  //参数liveCheck：为1时进行实时监测，否则只留用放入充电槽时的数值
+  if(liveCheck > 0){
+    dioCharging = PIN_getInputValue(CHARGE_DIO);
   }
   if(CHARGE_LAMP){
     return dioCharging;
@@ -220,7 +241,7 @@ uint8_t isChargeCompleted(void){
 }
 //非充电时判定电量低下
 uint8_t isBatteryLow(void){
-  if(isCharging() <= 0){
+  if(isCharging(0) <= 0){
     //根据DIO-27脚数值判定电量低下
     batteryData = getBatteryData();
     if(batteryData <= BATTERY_LOW_VOLTAGE){
@@ -271,11 +292,25 @@ void buttonCallbackFxn(PIN_Handle handle, PIN_Id pinId){
       //接收到了中断信号（暂时先用红板右侧按钮进行测试）
       //不同工况下，接收到的中断信号意义不同
       switch(getSYSTEMWorkLevel()){
-      case SYSTEM_ENERGY_LEVEL0:
-      case SYSTEM_ENERGY_LEVEL1:
-      case SYSTEM_ENERGY_LEVEL1_LPA:
+      //case SYSTEM_ENERGY_LEVEL0:
+      //case SYSTEM_ENERGY_LEVEL1:
+      //case SYSTEM_ENERGY_LEVEL1_LPA:
         //工况1以下：收到敲击信号，同意连接请求
+        //enableConnectBLE = CONNECT_RETRY_MAX;
+        //break;
+      case SYSTEM_ENERGY_LEVEL2_LPA:
+        //准2级工况：变为正2级工况
+        if(workStatus == WORKING_STATUS_REQUEST_DISCONNECT){
+          return;
+        }
+        if(workStatus == WORKING_STATUS_DECLINE_CONNECTION){
+          return;
+        }
+        //这里是从准2状态进入正2状态的关键
         enableConnectBLE = CONNECT_RETRY_MAX;
+        //错误！不能在这里立刻激活陀螺仪，否则会导致陀螺仪死机
+        //至少要等一个工作周期以后才行
+        //setSYSTEMWorkLevel(SYSTEM_ENERGY_LEVEL2);
         break;
       default:
         //2级以上工况：收到中断信号均为DMP一次计算完成

@@ -89,6 +89,8 @@ extern uint8_t getLPALampLoop(void);
 extern uint8_t enableAutoConnect;
 extern uint8_t bleIsToClose;
 
+extern uint8_t workStatus;
+
 extern void changeRxLevel(uint8_t neoRxLevel);
 extern void changeTxLevel(uint8_t neoTxLevel);
 
