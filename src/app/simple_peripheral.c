@@ -1880,6 +1880,16 @@ void stopAdvertising(void){
     //灯光响应充电模式
     if(CHARGE_BLINK_AT_CHARGE > 0){
       pinDark(1);
+    }else{
+      if(isCharging(1) > 0){
+        if(isChargeCompleted() > 0){
+          PIN_GLight();
+        }else{
+          PIN_RLight();
+        }
+      }else{
+        pinDark(1);
+      }
     }
   }else{
     //灯光不响应充电模式
@@ -1922,7 +1932,7 @@ void stopAdvertising(void){
     Util_startClock(&advertiseClock);
   }
   
-  //灭灯并进入0级状态
+  //进入0级状态
   setSYSTEMWorkLevel(SYSTEM_ENERGY_LEVEL0);
 }
 
@@ -1940,12 +1950,13 @@ void startAdvertising(void){
   }else{
     //充电时周期到达，亮灯
     if(isCharging(1) > 0){
-      pinDark(1);
       if(isChargeCompleted() > 0){
         PIN_GLight();
       }else{
         PIN_RLight();
       }
+    }else{
+      pinDark(1);
     }
   }
   
