@@ -20,7 +20,9 @@
 
 "--drv_swo_clock_setup=72000000,0,1000000" 
 
-"--xds_board_file=C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\arm\config\debugger\TexasInstruments\xds\CC2650_XDS110_JTAG.dat" 
+"--drv_interface=CJTAG" 
+
+"--xds_board_file=C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\arm\config\debugger\TexasInstruments\xds\CC2650_XDS110_CJTAG.dat" 
 
 "--xds_swo_port=none" 
 

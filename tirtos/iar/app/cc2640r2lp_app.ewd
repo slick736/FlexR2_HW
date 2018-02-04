@@ -1206,7 +1206,7 @@
                 </option>
                 <option>
                     <name>BoardFile</name>
-                    <state>$TOOLKIT_DIR$\config\debugger\TexasInstruments\xds\CC2650_XDS110_JTAG.dat</state>
+                    <state>$TOOLKIT_DIR$\config\debugger\TexasInstruments\xds\CC2650_XDS110_CJTAG.dat</state>
                 </option>
                 <option>
                     <name>DoLogfile</name>
@@ -1328,7 +1328,7 @@
                 </option>
                 <option>
                     <name>CCXds100InterfaceRadio</name>
-                    <state>0</state>
+                    <state>2</state>
                 </option>
                 <option>
                     <name>CCXds100InterfaceCmdLine</name>
