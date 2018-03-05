@@ -65,7 +65,7 @@
 #include "xyz_euler_profile.h"
 #include "simple_peripheral.h"
 
-#include "icall_api.h"
+#include "icall_ble_api.h"
 
 /*********************************************************************
  * MACROS
@@ -194,7 +194,7 @@ static gattCharCfg_t *xyzEulerChar4Config;
                                         
 // Simple Profile Characteristic 4 User Description
 //static uint8 simpleProfileChar4UserDesp[17] = "Characteristic 4";
-static uint8 xyzEulerChar4UserDesp[17] = "Char 4 - NotifyF";
+static uint8 xyzEulerChar4UserDesp[17] = "Notify Motion";
 
 //=================================================================================================
 

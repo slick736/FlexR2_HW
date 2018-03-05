@@ -1,6 +1,6 @@
 /******************************************************************************
 
- @file  osal_icall_ble.c
+ @file       osal_icall_ble.c
 
  @brief This file contains function that allows user setup tasks
 
@@ -40,8 +40,8 @@
  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
  ******************************************************************************
- Release Name: simplelink_cc2640r2_sdk_1_30_00_25
- Release Date: 2017-03-02 20:08:31
+ Release Name: simplelink_cc2640r2_sdk_01_50_00_58
+ Release Date: 2017-10-17 18:09:51
  *****************************************************************************/
 
 /**************************************************************************************************

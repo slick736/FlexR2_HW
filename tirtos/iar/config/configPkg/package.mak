@@ -15,82 +15,82 @@ XDCCFGDIR = package/cfg/
 # in the event that some included BOM script changes.
 #
 ifneq (clean,$(MAKECMDGOALS))
-C:/ti/xdctools_3_50_00_10_core/packages/xdc/utils.js:
-package.mak: C:/ti/xdctools_3_50_00_10_core/packages/xdc/utils.js
-C:/ti/xdctools_3_50_00_10_core/packages/xdc/xdc.tci:
-package.mak: C:/ti/xdctools_3_50_00_10_core/packages/xdc/xdc.tci
-C:/ti/xdctools_3_50_00_10_core/packages/xdc/template.xs:
-package.mak: C:/ti/xdctools_3_50_00_10_core/packages/xdc/template.xs
-C:/ti/xdctools_3_50_00_10_core/packages/xdc/om2.xs:
-package.mak: C:/ti/xdctools_3_50_00_10_core/packages/xdc/om2.xs
-C:/ti/xdctools_3_50_00_10_core/packages/xdc/xmlgen.xs:
-package.mak: C:/ti/xdctools_3_50_00_10_core/packages/xdc/xmlgen.xs
-C:/ti/xdctools_3_50_00_10_core/packages/xdc/xmlgen2.xs:
-package.mak: C:/ti/xdctools_3_50_00_10_core/packages/xdc/xmlgen2.xs
-C:/ti/xdctools_3_50_00_10_core/packages/xdc/Warnings.xs:
-package.mak: C:/ti/xdctools_3_50_00_10_core/packages/xdc/Warnings.xs
-C:/ti/xdctools_3_50_00_10_core/packages/xdc/IPackage.xs:
-package.mak: C:/ti/xdctools_3_50_00_10_core/packages/xdc/IPackage.xs
-C:/ti/xdctools_3_50_00_10_core/packages/xdc/package.xs:
-package.mak: C:/ti/xdctools_3_50_00_10_core/packages/xdc/package.xs
-C:/ti/xdctools_3_50_00_10_core/packages/xdc/services/global/Clock.xs:
-package.mak: C:/ti/xdctools_3_50_00_10_core/packages/xdc/services/global/Clock.xs
-C:/ti/xdctools_3_50_00_10_core/packages/xdc/services/global/Trace.xs:
-package.mak: C:/ti/xdctools_3_50_00_10_core/packages/xdc/services/global/Trace.xs
-C:/ti/xdctools_3_50_00_10_core/packages/xdc/bld/bld.js:
-package.mak: C:/ti/xdctools_3_50_00_10_core/packages/xdc/bld/bld.js
-C:/ti/xdctools_3_50_00_10_core/packages/xdc/bld/BuildEnvironment.xs:
-package.mak: C:/ti/xdctools_3_50_00_10_core/packages/xdc/bld/BuildEnvironment.xs
-C:/ti/xdctools_3_50_00_10_core/packages/xdc/bld/PackageContents.xs:
-package.mak: C:/ti/xdctools_3_50_00_10_core/packages/xdc/bld/PackageContents.xs
-C:/ti/xdctools_3_50_00_10_core/packages/xdc/bld/_gen.xs:
-package.mak: C:/ti/xdctools_3_50_00_10_core/packages/xdc/bld/_gen.xs
-C:/ti/xdctools_3_50_00_10_core/packages/xdc/bld/Library.xs:
-package.mak: C:/ti/xdctools_3_50_00_10_core/packages/xdc/bld/Library.xs
-C:/ti/xdctools_3_50_00_10_core/packages/xdc/bld/Executable.xs:
-package.mak: C:/ti/xdctools_3_50_00_10_core/packages/xdc/bld/Executable.xs
-C:/ti/xdctools_3_50_00_10_core/packages/xdc/bld/Repository.xs:
-package.mak: C:/ti/xdctools_3_50_00_10_core/packages/xdc/bld/Repository.xs
-C:/ti/xdctools_3_50_00_10_core/packages/xdc/bld/Configuration.xs:
-package.mak: C:/ti/xdctools_3_50_00_10_core/packages/xdc/bld/Configuration.xs
-C:/ti/xdctools_3_50_00_10_core/packages/xdc/bld/Script.xs:
-package.mak: C:/ti/xdctools_3_50_00_10_core/packages/xdc/bld/Script.xs
-C:/ti/xdctools_3_50_00_10_core/packages/xdc/bld/Manifest.xs:
-package.mak: C:/ti/xdctools_3_50_00_10_core/packages/xdc/bld/Manifest.xs
-C:/ti/xdctools_3_50_00_10_core/packages/xdc/bld/Utils.xs:
-package.mak: C:/ti/xdctools_3_50_00_10_core/packages/xdc/bld/Utils.xs
-C:/ti/xdctools_3_50_00_10_core/packages/xdc/bld/ITarget.xs:
-package.mak: C:/ti/xdctools_3_50_00_10_core/packages/xdc/bld/ITarget.xs
-C:/ti/xdctools_3_50_00_10_core/packages/xdc/bld/ITarget2.xs:
-package.mak: C:/ti/xdctools_3_50_00_10_core/packages/xdc/bld/ITarget2.xs
-C:/ti/xdctools_3_50_00_10_core/packages/xdc/bld/ITarget3.xs:
-package.mak: C:/ti/xdctools_3_50_00_10_core/packages/xdc/bld/ITarget3.xs
-C:/ti/xdctools_3_50_00_10_core/packages/xdc/bld/ITargetFilter.xs:
-package.mak: C:/ti/xdctools_3_50_00_10_core/packages/xdc/bld/ITargetFilter.xs
-C:/ti/xdctools_3_50_00_10_core/packages/xdc/bld/package.xs:
-package.mak: C:/ti/xdctools_3_50_00_10_core/packages/xdc/bld/package.xs
+C:/ti/xdctools_3_50_03_33_core/packages/xdc/utils.js:
+package.mak: C:/ti/xdctools_3_50_03_33_core/packages/xdc/utils.js
+C:/ti/xdctools_3_50_03_33_core/packages/xdc/xdc.tci:
+package.mak: C:/ti/xdctools_3_50_03_33_core/packages/xdc/xdc.tci
+C:/ti/xdctools_3_50_03_33_core/packages/xdc/template.xs:
+package.mak: C:/ti/xdctools_3_50_03_33_core/packages/xdc/template.xs
+C:/ti/xdctools_3_50_03_33_core/packages/xdc/om2.xs:
+package.mak: C:/ti/xdctools_3_50_03_33_core/packages/xdc/om2.xs
+C:/ti/xdctools_3_50_03_33_core/packages/xdc/xmlgen.xs:
+package.mak: C:/ti/xdctools_3_50_03_33_core/packages/xdc/xmlgen.xs
+C:/ti/xdctools_3_50_03_33_core/packages/xdc/xmlgen2.xs:
+package.mak: C:/ti/xdctools_3_50_03_33_core/packages/xdc/xmlgen2.xs
+C:/ti/xdctools_3_50_03_33_core/packages/xdc/Warnings.xs:
+package.mak: C:/ti/xdctools_3_50_03_33_core/packages/xdc/Warnings.xs
+C:/ti/xdctools_3_50_03_33_core/packages/xdc/IPackage.xs:
+package.mak: C:/ti/xdctools_3_50_03_33_core/packages/xdc/IPackage.xs
+C:/ti/xdctools_3_50_03_33_core/packages/xdc/package.xs:
+package.mak: C:/ti/xdctools_3_50_03_33_core/packages/xdc/package.xs
+C:/ti/xdctools_3_50_03_33_core/packages/xdc/services/global/Clock.xs:
+package.mak: C:/ti/xdctools_3_50_03_33_core/packages/xdc/services/global/Clock.xs
+C:/ti/xdctools_3_50_03_33_core/packages/xdc/services/global/Trace.xs:
+package.mak: C:/ti/xdctools_3_50_03_33_core/packages/xdc/services/global/Trace.xs
+C:/ti/xdctools_3_50_03_33_core/packages/xdc/bld/bld.js:
+package.mak: C:/ti/xdctools_3_50_03_33_core/packages/xdc/bld/bld.js
+C:/ti/xdctools_3_50_03_33_core/packages/xdc/bld/BuildEnvironment.xs:
+package.mak: C:/ti/xdctools_3_50_03_33_core/packages/xdc/bld/BuildEnvironment.xs
+C:/ti/xdctools_3_50_03_33_core/packages/xdc/bld/PackageContents.xs:
+package.mak: C:/ti/xdctools_3_50_03_33_core/packages/xdc/bld/PackageContents.xs
+C:/ti/xdctools_3_50_03_33_core/packages/xdc/bld/_gen.xs:
+package.mak: C:/ti/xdctools_3_50_03_33_core/packages/xdc/bld/_gen.xs
+C:/ti/xdctools_3_50_03_33_core/packages/xdc/bld/Library.xs:
+package.mak: C:/ti/xdctools_3_50_03_33_core/packages/xdc/bld/Library.xs
+C:/ti/xdctools_3_50_03_33_core/packages/xdc/bld/Executable.xs:
+package.mak: C:/ti/xdctools_3_50_03_33_core/packages/xdc/bld/Executable.xs
+C:/ti/xdctools_3_50_03_33_core/packages/xdc/bld/Repository.xs:
+package.mak: C:/ti/xdctools_3_50_03_33_core/packages/xdc/bld/Repository.xs
+C:/ti/xdctools_3_50_03_33_core/packages/xdc/bld/Configuration.xs:
+package.mak: C:/ti/xdctools_3_50_03_33_core/packages/xdc/bld/Configuration.xs
+C:/ti/xdctools_3_50_03_33_core/packages/xdc/bld/Script.xs:
+package.mak: C:/ti/xdctools_3_50_03_33_core/packages/xdc/bld/Script.xs
+C:/ti/xdctools_3_50_03_33_core/packages/xdc/bld/Manifest.xs:
+package.mak: C:/ti/xdctools_3_50_03_33_core/packages/xdc/bld/Manifest.xs
+C:/ti/xdctools_3_50_03_33_core/packages/xdc/bld/Utils.xs:
+package.mak: C:/ti/xdctools_3_50_03_33_core/packages/xdc/bld/Utils.xs
+C:/ti/xdctools_3_50_03_33_core/packages/xdc/bld/ITarget.xs:
+package.mak: C:/ti/xdctools_3_50_03_33_core/packages/xdc/bld/ITarget.xs
+C:/ti/xdctools_3_50_03_33_core/packages/xdc/bld/ITarget2.xs:
+package.mak: C:/ti/xdctools_3_50_03_33_core/packages/xdc/bld/ITarget2.xs
+C:/ti/xdctools_3_50_03_33_core/packages/xdc/bld/ITarget3.xs:
+package.mak: C:/ti/xdctools_3_50_03_33_core/packages/xdc/bld/ITarget3.xs
+C:/ti/xdctools_3_50_03_33_core/packages/xdc/bld/ITargetFilter.xs:
+package.mak: C:/ti/xdctools_3_50_03_33_core/packages/xdc/bld/ITargetFilter.xs
+C:/ti/xdctools_3_50_03_33_core/packages/xdc/bld/package.xs:
+package.mak: C:/ti/xdctools_3_50_03_33_core/packages/xdc/bld/package.xs
 package.mak: config.bld
-C:/ti/simplelink_cc2640r2_sdk_1_30_00_25/kernel/tirtos/packages/iar/targets/arm/ITarget.xs:
-package.mak: C:/ti/simplelink_cc2640r2_sdk_1_30_00_25/kernel/tirtos/packages/iar/targets/arm/ITarget.xs
-C:/ti/simplelink_cc2640r2_sdk_1_30_00_25/kernel/tirtos/packages/iar/targets/arm/package.xs:
-package.mak: C:/ti/simplelink_cc2640r2_sdk_1_30_00_25/kernel/tirtos/packages/iar/targets/arm/package.xs
-C:/ti/xdctools_3_50_00_10_core/packages/xdc/services/io/File.xs:
-package.mak: C:/ti/xdctools_3_50_00_10_core/packages/xdc/services/io/File.xs
-C:/ti/xdctools_3_50_00_10_core/packages/xdc/services/io/package.xs:
-package.mak: C:/ti/xdctools_3_50_00_10_core/packages/xdc/services/io/package.xs
+C:/ti/simplelink_cc2640r2_sdk_1_50_00_58/kernel/tirtos/packages/iar/targets/arm/ITarget.xs:
+package.mak: C:/ti/simplelink_cc2640r2_sdk_1_50_00_58/kernel/tirtos/packages/iar/targets/arm/ITarget.xs
+C:/ti/simplelink_cc2640r2_sdk_1_50_00_58/kernel/tirtos/packages/iar/targets/arm/package.xs:
+package.mak: C:/ti/simplelink_cc2640r2_sdk_1_50_00_58/kernel/tirtos/packages/iar/targets/arm/package.xs
+C:/ti/xdctools_3_50_03_33_core/packages/xdc/services/io/File.xs:
+package.mak: C:/ti/xdctools_3_50_03_33_core/packages/xdc/services/io/File.xs
+C:/ti/xdctools_3_50_03_33_core/packages/xdc/services/io/package.xs:
+package.mak: C:/ti/xdctools_3_50_03_33_core/packages/xdc/services/io/package.xs
 package.mak: package.bld
-C:/ti/xdctools_3_50_00_10_core/packages/xdc/tools/configuro/template/compiler.opt.xdt:
-package.mak: C:/ti/xdctools_3_50_00_10_core/packages/xdc/tools/configuro/template/compiler.opt.xdt
-C:/ti/xdctools_3_50_00_10_core/packages/xdc/tools/configuro/template/compiler.defs.xdt:
-package.mak: C:/ti/xdctools_3_50_00_10_core/packages/xdc/tools/configuro/template/compiler.defs.xdt
-C:/ti/xdctools_3_50_00_10_core/packages/xdc/tools/configuro/template/custom.mak.exe.xdt:
-package.mak: C:/ti/xdctools_3_50_00_10_core/packages/xdc/tools/configuro/template/custom.mak.exe.xdt
-C:/ti/xdctools_3_50_00_10_core/packages/xdc/tools/configuro/template/package.xs.xdt:
-package.mak: C:/ti/xdctools_3_50_00_10_core/packages/xdc/tools/configuro/template/package.xs.xdt
+C:/ti/xdctools_3_50_03_33_core/packages/xdc/tools/configuro/template/compiler.opt.xdt:
+package.mak: C:/ti/xdctools_3_50_03_33_core/packages/xdc/tools/configuro/template/compiler.opt.xdt
+C:/ti/xdctools_3_50_03_33_core/packages/xdc/tools/configuro/template/compiler.defs.xdt:
+package.mak: C:/ti/xdctools_3_50_03_33_core/packages/xdc/tools/configuro/template/compiler.defs.xdt
+C:/ti/xdctools_3_50_03_33_core/packages/xdc/tools/configuro/template/custom.mak.exe.xdt:
+package.mak: C:/ti/xdctools_3_50_03_33_core/packages/xdc/tools/configuro/template/custom.mak.exe.xdt
+C:/ti/xdctools_3_50_03_33_core/packages/xdc/tools/configuro/template/package.xs.xdt:
+package.mak: C:/ti/xdctools_3_50_03_33_core/packages/xdc/tools/configuro/template/package.xs.xdt
 endif
 
 iar.targets.arm.M3.rootDir ?= C:/PROGRA~2/IARSYS~1/EMBEDD~2.0/arm
-iar.targets.arm.packageBase ?= C:/ti/simplelink_cc2640r2_sdk_1_30_00_25/kernel/tirtos/packages/iar/targets/arm/
+iar.targets.arm.packageBase ?= C:/ti/simplelink_cc2640r2_sdk_1_50_00_58/kernel/tirtos/packages/iar/targets/arm/
 .PRECIOUS: $(XDCCFGDIR)/%.orm3
 .PHONY: all,rm3 .dlls,rm3 .executables,rm3 test,rm3
 all,rm3: .executables,rm3
@@ -157,7 +157,7 @@ app_ble.xrm3: package/cfg/app_ble_prm3.orm3
 	$(RM) $@
 	@$(MSG) lnkrm3 $@ ...
 	$(RM) $(XDCCFGDIR)/$@.map
-	LC_ALL=C $(iar.targets.arm.M3.rootDir)/bin/ilinkarm -o C:/ti/simplelink_cc2640r2_sdk_1_30_00_25/examples/rtos/CC2640R2_LAUNCHXL/blestack/simple_peripheral/tirtos/iar/app/FlashROM/Exe/simple_peripheral_cc2640r2lp_app.out --config_def CC2650=2 --map C:/ti/simplelink_cc2640r2_sdk_1_30_00_25/examples/rtos/CC2640R2_LAUNCHXL/blestack/simple_peripheral/tirtos/iar/app/FlashROM/List/simple_peripheral_cc2640r2lp_app.map --config C:/ti/simplelink_cc2640r2_sdk_1_30_00_25/examples/rtos/CC2640R2_LAUNCHXL/blestack/simple_peripheral/tirtos/iar/app/../../../../../../../../source/ti/blestack/common/cc26xx/iar/cc26xx_app.icf --keep __vector_table -f C:/ti/simplelink_cc2640r2_sdk_1_30_00_25/examples/rtos/CC2640R2_LAUNCHXL/blestack/simple_peripheral/tirtos/iar/app/../config/configPkg/linker.cmd -f C:/ti/simplelink_cc2640r2_sdk_1_30_00_25/examples/rtos/CC2640R2_LAUNCHXL/blestack/simple_peripheral/tirtos/iar/app/../config/iar_boundary.xcl C:/ti/simplelink_cc2640r2_sdk_1_30_00_25/examples/rtos/CC2640R2_LAUNCHXL/blestack/simple_peripheral/tirtos/iar/app/../../../../../../../../source/ti/blestack/rom//ble_rom_releases/cc26xx_r2/Final_Release/common_r2.symbols C:/ti/simplelink_cc2640r2_sdk_1_30_00_25/examples/rtos/CC2640R2_LAUNCHXL/blestack/simple_peripheral/tirtos/iar/app/../../../../../../../../source/ti/devices/cc26x0r2/driverlib/bin/iar/driverlib.lib C:/ti/simplelink_cc2640r2_sdk_1_30_00_25/examples/rtos/CC2640R2_LAUNCHXL/blestack/simple_peripheral/tirtos/iar/app/../../../../../../../../kernel/tirtos/packages/ti/dpl/lib/dpl_cc26x0r2.arm3 C:/ti/simplelink_cc2640r2_sdk_1_30_00_25/examples/rtos/CC2640R2_LAUNCHXL/blestack/simple_peripheral/tirtos/iar/app/../../../../../../../../source/ti/drivers/lib/drivers_cc26x0r2.arm3 C:/ti/simplelink_cc2640r2_sdk_1_30_00_25/examples/rtos/CC2640R2_LAUNCHXL/blestack/simple_peripheral/tirtos/iar/app/../../../../../../../../source/ti/drivers/rf/lib/rf_singleMode_cc26x0r2.arm3 C:/ti/simplelink_cc2640r2_sdk_1_30_00_25/examples/rtos/CC2640R2_LAUNCHXL/blestack/simple_peripheral/tirtos/iar/app/../../../../../../../../source/ti/display/lib/display.arm3 --entry __iar_program_start --vfe --text_out locale --silent -o $@ package/cfg/app_ble_prm3.orm3 -f package/cfg/app_ble_prm3.xdl  --semihosting=iar_breakpoint  --cpu=Cortex-M3 --map $(XDCCFGDIR)/$@.map  --redirect _Printf=_PrintfSmall --redirect _Scanf=_ScanfSmall 
+	LC_ALL=C $(iar.targets.arm.M3.rootDir)/bin/ilinkarm -o C:/ti/simplelink_cc2640r2_sdk_1_50_00_58/examples/rtos/CC2640R2_LAUNCHXL/blestack/simple_peripheral_healer/tirtos/iar/app/FlashROM_StackLibrary/Exe/ble_simple_peripheral_cc2640r2lp_app_FlashROM_StackLibrary.out --config_def CC2650=2 --config_def FLASH_ROM_BUILD=2 --map C:/ti/simplelink_cc2640r2_sdk_1_50_00_58/examples/rtos/CC2640R2_LAUNCHXL/blestack/simple_peripheral_healer/tirtos/iar/app/FlashROM_StackLibrary/List/ble_simple_peripheral_cc2640r2lp_app_FlashROM_StackLibrary.map --config C:/ti/simplelink_cc2640r2_sdk_1_50_00_58/examples/rtos/CC2640R2_LAUNCHXL/blestack/simple_peripheral_healer/tirtos/iar/app/../../../../../../../../source/ti/blestack/common/cc26xx/iar/cc26xx_app_and_stack.icf --keep __vector_table -f C:/ti/simplelink_cc2640r2_sdk_1_50_00_58/examples/rtos/CC2640R2_LAUNCHXL/blestack/simple_peripheral_healer/tirtos/iar/app/../config/configPkg/linker.cmd -f C:/ti/simplelink_cc2640r2_sdk_1_50_00_58/examples/rtos/CC2640R2_LAUNCHXL/blestack/simple_peripheral_healer/tirtos/iar/app/../config/lib_linker.cmd C:/ti/simplelink_cc2640r2_sdk_1_50_00_58/examples/rtos/CC2640R2_LAUNCHXL/blestack/simple_peripheral_healer/tirtos/iar/app/../config/ble_r2.symbols C:/ti/simplelink_cc2640r2_sdk_1_50_00_58/examples/rtos/CC2640R2_LAUNCHXL/blestack/simple_peripheral_healer/tirtos/iar/app/../../../../../../../../source/ti/devices/cc26x0r2/driverlib/bin/iar/driverlib.lib C:/ti/simplelink_cc2640r2_sdk_1_50_00_58/examples/rtos/CC2640R2_LAUNCHXL/blestack/simple_peripheral_healer/tirtos/iar/app/../../../../../../../../kernel/tirtos/packages/ti/dpl/lib/dpl_cc26x0r2.arm3 C:/ti/simplelink_cc2640r2_sdk_1_50_00_58/examples/rtos/CC2640R2_LAUNCHXL/blestack/simple_peripheral_healer/tirtos/iar/app/../../../../../../../../source/ti/drivers/lib/drivers_cc26x0r2.arm3 C:/ti/simplelink_cc2640r2_sdk_1_50_00_58/examples/rtos/CC2640R2_LAUNCHXL/blestack/simple_peripheral_healer/tirtos/iar/app/../../../../../../../../source/ti/drivers/rf/lib/rf_singleMode_cc26x0r2.arm3 C:/ti/simplelink_cc2640r2_sdk_1_50_00_58/examples/rtos/CC2640R2_LAUNCHXL/blestack/simple_peripheral_healer/tirtos/iar/app/../../../../../../../../source/ti/display/lib/display.arm3 C:/ti/simplelink_cc2640r2_sdk_1_50_00_58/examples/rtos/CC2640R2_LAUNCHXL/blestack/simple_peripheral_healer/tirtos/iar/app/../../../../../../../../source/ti/grlib/lib/grlib.arm3 C:/ti/simplelink_cc2640r2_sdk_1_50_00_58/examples/rtos/CC2640R2_LAUNCHXL/blestack/simple_peripheral_healer/tirtos/iar/app/../../../../../../../../source/ti/mw/lcd/lib/lcd.arm3 --entry __iar_program_start --vfe --text_out locale --silent -o $@ package/cfg/app_ble_prm3.orm3 -f package/cfg/app_ble_prm3.xdl  --semihosting=iar_breakpoint  --cpu=Cortex-M3 --map $(XDCCFGDIR)/$@.map  --redirect _Printf=_PrintfSmall --redirect _Scanf=_ScanfSmall 
 	
 
 app_ble.test test,rm3 test: app_ble.xrm3.test

@@ -58,7 +58,7 @@
 #include "gattservapp.h"
 
 #include "devinfoservice.h"
-#include "icall_api.h"
+#include "icall_ble_api.h"
 
 /*********************************************************************
  * MACROS

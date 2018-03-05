@@ -1,4 +1,0 @@
-目前稳定运行的
-Branch是：PeriRoleNewLamp
-Commit是：Fixed Crash
-若最新的Commit出现问题，要立刻退回到这里

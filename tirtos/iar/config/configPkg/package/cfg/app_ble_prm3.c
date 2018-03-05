@@ -2,7 +2,7 @@
  *  Do not modify this file; it is automatically 
  *  generated and any modifications will be overwritten.
  *
- * @(#) xdc-D05
+ * @(#) xdc-D20
  */
 
 #define __nested__
@@ -12,9 +12,9 @@
 
 /*
  * ======== GENERATED SECTIONS ========
- *     
+ *
  *     MODULE INCLUDES
- *     
+ *
  *     <module-name> INTERNALS
  *     <module-name> INHERITS
  *     <module-name> VTABLE
@@ -29,7 +29,7 @@
  *     <module-name> VIRTUAL FUNCTIONS
  *     <module-name> SYSTEM FUNCTIONS
  *     <module-name> PRAGMAS
- *     
+ *
  *     INITIALIZATION ENTRY POINT
  *     PROGRAM GLOBALS
  *     CLINK DIRECTIVES
@@ -50,6 +50,7 @@
 #include <ti/sysbios/gates/GateHwi.h>
 #include <ti/sysbios/gates/GateMutex.h>
 #include <ti/sysbios/hal/Hwi.h>
+#include <ti/sysbios/heaps/HeapCallback.h>
 #include <ti/sysbios/heaps/HeapMem.h>
 #include <ti/sysbios/knl/Clock.h>
 #include <ti/sysbios/knl/Event.h>
@@ -324,6 +325,32 @@ typedef struct {
     xdc_runtime_Types_InstHdr hdr;
     ti_sysbios_hal_Hwi_HwiProxy_Object__ obj;
 } ti_sysbios_hal_Hwi_HwiProxy_Object2__;
+
+
+/*
+ * ======== ti.sysbios.heaps.HeapCallback INTERNALS ========
+ */
+
+/* Module__ */
+typedef struct ti_sysbios_heaps_HeapCallback_Module__ {
+    xdc_runtime_Types_Link link;
+} ti_sysbios_heaps_HeapCallback_Module__;
+
+/* Module__root__V */
+extern ti_sysbios_heaps_HeapCallback_Module__ ti_sysbios_heaps_HeapCallback_Module__root__V;
+
+/* Object__ */
+typedef struct ti_sysbios_heaps_HeapCallback_Object__ {
+    const ti_sysbios_heaps_HeapCallback_Fxns__ *__fxns;
+    xdc_UArg context;
+    xdc_UArg arg;
+} ti_sysbios_heaps_HeapCallback_Object__;
+
+/* Object2__ */
+typedef struct {
+    xdc_runtime_Types_InstHdr hdr;
+    ti_sysbios_heaps_HeapCallback_Object__ obj;
+} ti_sysbios_heaps_HeapCallback_Object2__;
 
 
 /*
@@ -711,10 +738,10 @@ typedef struct xdc_runtime_Memory_HeapProxy_Module__ {
 /* Module__root__V */
 extern xdc_runtime_Memory_HeapProxy_Module__ xdc_runtime_Memory_HeapProxy_Module__root__V;
 
-/* <-- ti_sysbios_heaps_HeapMem_Object */
+/* <-- ti_sysbios_heaps_HeapCallback_Object */
 
 /* Object */
-typedef ti_sysbios_heaps_HeapMem_Object__ xdc_runtime_Memory_HeapProxy_Object__;
+typedef ti_sysbios_heaps_HeapCallback_Object__ xdc_runtime_Memory_HeapProxy_Object__;
 
 /* Object2__ */
 typedef struct {
@@ -850,7 +877,7 @@ const ti_sysbios_gates_GateHwi_Fxns__ ti_sysbios_gates_GateHwi_Module__FXNS__C =
         ti_sysbios_gates_GateHwi_Object__create__S,
         NULL, /* __delete */
         NULL, /* __label */
-        0x2d, /* __mid */
+        0x30, /* __mid */
     } /* __sfxns */
 };
 
@@ -869,6 +896,28 @@ const ti_sysbios_gates_GateMutex_Fxns__ ti_sysbios_gates_GateMutex_Module__FXNS_
     ti_sysbios_gates_GateMutex_leave__E,
     {
         ti_sysbios_gates_GateMutex_Object__create__S,
+        NULL, /* __delete */
+        NULL, /* __label */
+        0x31, /* __mid */
+    } /* __sfxns */
+};
+
+
+/*
+ * ======== ti.sysbios.heaps.HeapCallback VTABLE ========
+ */
+
+/* Module__FXNS__C */
+#pragma location = ".const_ti_sysbios_heaps_HeapCallback_Module__FXNS__C"
+const ti_sysbios_heaps_HeapCallback_Fxns__ ti_sysbios_heaps_HeapCallback_Module__FXNS__C = {
+    &xdc_runtime_IHeap_Interface__BASE__C, /* __base */
+    &ti_sysbios_heaps_HeapCallback_Module__FXNS__C.__sfxns, /* __sysp */
+    ti_sysbios_heaps_HeapCallback_alloc__E,
+    ti_sysbios_heaps_HeapCallback_free__E,
+    ti_sysbios_heaps_HeapCallback_isBlocking__E,
+    ti_sysbios_heaps_HeapCallback_getStats__E,
+    {
+        ti_sysbios_heaps_HeapCallback_Object__create__S,
         NULL, /* __delete */
         NULL, /* __label */
         0x2e, /* __mid */
@@ -893,7 +942,7 @@ const ti_sysbios_heaps_HeapMem_Fxns__ ti_sysbios_heaps_HeapMem_Module__FXNS__C =
         ti_sysbios_heaps_HeapMem_Object__create__S,
         NULL, /* __delete */
         NULL, /* __label */
-        0x2f, /* __mid */
+        0x2d, /* __mid */
     } /* __sfxns */
 };
 
@@ -1041,9 +1090,6 @@ __T1_ti_sysbios_family_arm_m3_Hwi_Module_State__excContext ti_sysbios_family_arm
 /* --> ti_sysbios_family_arm_m3_Hwi_Module_State_0_excStack__A */
 __T1_ti_sysbios_family_arm_m3_Hwi_Module_State__excStack ti_sysbios_family_arm_m3_Hwi_Module_State_0_excStack__A[1];
 
-/* --> __TI_STACK_BASE */
-extern void* __TI_STACK_BASE;
-
 /* Module__state__V */
 ti_sysbios_family_arm_m3_Hwi_Module_State__ ti_sysbios_family_arm_m3_Hwi_Module__state__V;
 
@@ -1100,25 +1146,37 @@ ti_sysbios_gates_GateMutex_Object__ ti_sysbios_gates_GateMutex_Object__table__V[
 
 
 /*
- * ======== ti.sysbios.heaps.HeapMem DECLARATIONS ========
+ * ======== ti.sysbios.heaps.HeapCallback DECLARATIONS ========
  */
 
-#ifdef __IAR_SYSTEMS_ICC__
-    #pragma data_alignment=8
-#endif
-/* --> ti_sysbios_heaps_HeapMem_Instance_State_0_buf__A */
-__T1_ti_sysbios_heaps_HeapMem_Instance_State__buf ti_sysbios_heaps_HeapMem_Instance_State_0_buf__A[1664];
-#ifdef __ti__align
-    #pragma DATA_ALIGN(ti_sysbios_heaps_HeapMem_Instance_State_0_buf__A, 8);
-#endif
-#ifdef __GNUC__
-#ifndef __TI_COMPILER_VERSION__
-__T1_ti_sysbios_heaps_HeapMem_Instance_State__buf ti_sysbios_heaps_HeapMem_Instance_State_0_buf__A[1664] __attribute__ ((aligned(8)));
-#endif
-#endif
-
 /* Object__table__V */
-ti_sysbios_heaps_HeapMem_Object__ ti_sysbios_heaps_HeapMem_Object__table__V[1];
+ti_sysbios_heaps_HeapCallback_Object__ ti_sysbios_heaps_HeapCallback_Object__table__V[1];
+
+/* --> osalHeapAllocFxn */
+extern xdc_Ptr osalHeapAllocFxn(xdc_UArg,xdc_SizeT,xdc_SizeT);
+
+/* --> ti_sysbios_heaps_HeapCallback_defaultCreate */
+extern xdc_UArg ti_sysbios_heaps_HeapCallback_defaultCreate(xdc_UArg);
+
+/* --> ti_sysbios_heaps_HeapCallback_defaultDelete */
+extern xdc_Void ti_sysbios_heaps_HeapCallback_defaultDelete(xdc_UArg);
+
+/* --> osalHeapFreeFxn */
+extern xdc_Void osalHeapFreeFxn(xdc_UArg,xdc_Ptr,xdc_SizeT);
+
+/* --> osalHeapGetStatsFxn */
+extern xdc_Void osalHeapGetStatsFxn(xdc_UArg,xdc_runtime_Memory_Stats*);
+
+/* --> osalHeapInitFxn */
+extern xdc_UArg osalHeapInitFxn(xdc_UArg);
+
+/* --> osalHeapIsBlockingFxn */
+extern xdc_Bool osalHeapIsBlockingFxn(xdc_UArg);
+
+
+/*
+ * ======== ti.sysbios.heaps.HeapMem DECLARATIONS ========
+ */
 
 
 /*
@@ -1438,11 +1496,14 @@ extern xdc_Int ti_sysbios_family_arm_cc26xx_TimestampProvider_Module_startup__E(
 /* --> ti_sysbios_hal_Hwi_Module_startup__E */
 extern xdc_Int ti_sysbios_hal_Hwi_Module_startup__E(xdc_Int);
 
+/* --> ti_sysbios_heaps_HeapCallback_Module_startup__E */
+extern xdc_Int ti_sysbios_heaps_HeapCallback_Module_startup__E(xdc_Int);
+
 /* --> xdc_runtime_Startup_sfxnTab__A */
-const __T1_xdc_runtime_Startup_sfxnTab xdc_runtime_Startup_sfxnTab__A[9];
+const __T1_xdc_runtime_Startup_sfxnTab xdc_runtime_Startup_sfxnTab__A[10];
 
 /* --> xdc_runtime_Startup_sfxnRts__A */
-const __T1_xdc_runtime_Startup_sfxnRts xdc_runtime_Startup_sfxnRts__A[9];
+const __T1_xdc_runtime_Startup_sfxnRts xdc_runtime_Startup_sfxnRts__A[10];
 
 
 /*
@@ -1592,7 +1653,7 @@ __FAR__ const xdc_SizeT ti_sysbios_knl_Task_Module_State_terminatedQ__O = offset
  *  Define absolute path prefix for this executable's
  *  configuration generated files.
  */
-xdc__META(__ASM__, "@(#)__ASM__ = C:/ti/simplelink_cc2640r2_sdk_1_30_00_25/examples/rtos/CC2640R2_LAUNCHXL/blestack/simple_peripheral/tirtos/iar/config/configPkg/package/cfg/app_ble_prm3");
+xdc__META(__ASM__, "@(#)__ASM__ = C:/ti/simplelink_cc2640r2_sdk_1_50_00_58/examples/rtos/CC2640R2_LAUNCHXL/blestack/simple_peripheral_healer/tirtos/iar/config/configPkg/package/cfg/app_ble_prm3");
 
 /*
  *  ======== __ISA__ ========
@@ -1664,6 +1725,10 @@ xdc_runtime_Error_Block xdc_runtime_Error_IgnoreBlock = {
 /*
  *  ======== MODULE STARTUP DONE FUNCTIONS ========
  */
+xdc_Bool ti_sysbios_heaps_HeapCallback_Module__startupDone__F(void); /* keep GCC prototype warning quiet */
+xdc_Bool ti_sysbios_heaps_HeapCallback_Module__startupDone__F(void) {
+    return (&xdc_runtime_Startup_Module__state__V)->stateTab == 0 || (&xdc_runtime_Startup_Module__state__V)->stateTab[9] < 0;
+}
 
 
 xdc_Int xdc_runtime_Startup_getState__I(xdc_runtime_Types_ModuleId id) {
@@ -1712,8 +1777,8 @@ xdc_Void xdc_runtime_Startup_exec__I(void) __attribute__ ((externally_visible));
  */
 xdc_Void xdc_runtime_Startup_exec__I(void)
 {
-    xdc_Int state[9];
-    xdc_runtime_Startup_startModsFxn__C(state, 9);
+    xdc_Int state[10];
+    xdc_runtime_Startup_startModsFxn__C(state, 10);
 }
 
 /*
@@ -2182,7 +2247,8 @@ UInt32 ti_sysbios_family_arm_m3_Hwi_dispatchTable[50];
 Void ti_sysbios_family_arm_m3_Hwi_initIsrStackSize()
 {
     #pragma section = "CSTACK"
-        ti_sysbios_family_arm_m3_Hwi_Module__state__V.isrStackSize = (Void *)__section_size("CSTACK");
+    ti_sysbios_family_arm_m3_Hwi_Module__state__V.isrStackBase = (Void *)__section_begin("CSTACK");
+    ti_sysbios_family_arm_m3_Hwi_Module__state__V.isrStackSize = (Void *)__section_size("CSTACK");
 }
 #endif
 
@@ -2191,13 +2257,9 @@ Void ti_sysbios_family_arm_m3_Hwi_initIsrStackSize()
  */
 
 
-#ifdef DEVICE_FAMILY
-#define DEVICE_FAMILY_PREFIX(x) <ti/devices/DEVICE_FAMILY/x>
-#else
-#define DEVICE_FAMILY_PREFIX(x) <x>
-#endif
+#include <ti/devices/DeviceFamily.h>
 
-#include DEVICE_FAMILY_PREFIX(inc/hw_types.h)
+#include DeviceFamily_constructPath(inc/hw_types.h)
 
 
 extern Void __iar_program_start();
@@ -2264,9 +2326,9 @@ typedef union Header {
 } Header;
 
 /*
- *  ======== malloc ========
+ *  ======== ti_sysbios_rts_gnu_MemAlloc_alloc ========
  */
-Void ATTRIBUTE *malloc(SizeT size)
+static Void *ti_sysbios_rts_gnu_MemAlloc_alloc(SizeT size)
 {
     Header *packet;
     xdc_runtime_Error_Block eb;
@@ -2288,6 +2350,14 @@ Void ATTRIBUTE *malloc(SizeT size)
     packet->header.size = size + sizeof(Header);
 
     return (packet + 1);
+}
+
+/*
+ *  ======== malloc ========
+ */
+Void ATTRIBUTE *malloc(SizeT size)
+{
+    return (ti_sysbios_rts_gnu_MemAlloc_alloc(size));
 }
 
 /*
@@ -2346,7 +2416,7 @@ Void ATTRIBUTE *calloc(SizeT nmemb, SizeT size)
         return (NULL);
     }
 
-    retval = malloc(nbytes);
+    retval = ti_sysbios_rts_gnu_MemAlloc_alloc(nbytes);
     if (retval != NULL) {
         (Void)memset(retval, (Int)'\0', nbytes);
     }
@@ -2560,7 +2630,7 @@ __FAR__ const CT__ti_sysbios_BIOS_clockEnabled ti_sysbios_BIOS_clockEnabled__C =
 
 /* heapSize__C */
 #pragma location = ".const_ti_sysbios_BIOS_heapSize__C"
-__FAR__ const CT__ti_sysbios_BIOS_heapSize ti_sysbios_BIOS_heapSize__C = (xdc_SizeT)0x684;
+__FAR__ const CT__ti_sysbios_BIOS_heapSize ti_sysbios_BIOS_heapSize__C = (xdc_SizeT)0x1000;
 
 /* heapSection__C */
 #pragma location = ".const_ti_sysbios_BIOS_heapSection__C"
@@ -2995,7 +3065,7 @@ ti_sysbios_family_arm_m3_Hwi_Module_State__ ti_sysbios_family_arm_m3_Hwi_Module_
     ((void*)ti_sysbios_family_arm_m3_Hwi_Module_State_0_excContext__A),  /* excContext */
     ((void*)ti_sysbios_family_arm_m3_Hwi_Module_State_0_excStack__A),  /* excStack */
     ((xdc_Ptr)0),  /* isrStack */
-    ((xdc_Ptr)((void*)&__TI_STACK_BASE)),  /* isrStackBase */
+    ((xdc_Ptr)0),  /* isrStackBase */
     ((xdc_Ptr)0),  /* isrStackSize */
     ((xdc_Ptr)(0x20000000)),  /* vectorTableBase */
     (xdc_UInt)0x101,  /* swiTaskKeys */
@@ -3424,7 +3494,7 @@ __FAR__ const CT__ti_sysbios_gates_GateHwi_Module__gatePrms ti_sysbios_gates_Gat
 
 /* Module__id__C */
 #pragma location = ".const_ti_sysbios_gates_GateHwi_Module__id__C"
-__FAR__ const CT__ti_sysbios_gates_GateHwi_Module__id ti_sysbios_gates_GateHwi_Module__id__C = (xdc_Bits16)0x2d;
+__FAR__ const CT__ti_sysbios_gates_GateHwi_Module__id ti_sysbios_gates_GateHwi_Module__id__C = (xdc_Bits16)0x30;
 
 /* Module__loggerDefined__C */
 #pragma location = ".const_ti_sysbios_gates_GateHwi_Module__loggerDefined__C"
@@ -3553,7 +3623,7 @@ __FAR__ const CT__ti_sysbios_gates_GateMutex_Module__gatePrms ti_sysbios_gates_G
 
 /* Module__id__C */
 #pragma location = ".const_ti_sysbios_gates_GateMutex_Module__id__C"
-__FAR__ const CT__ti_sysbios_gates_GateMutex_Module__id ti_sysbios_gates_GateMutex_Module__id__C = (xdc_Bits16)0x2e;
+__FAR__ const CT__ti_sysbios_gates_GateMutex_Module__id ti_sysbios_gates_GateMutex_Module__id__C = (xdc_Bits16)0x31;
 
 /* Module__loggerDefined__C */
 #pragma location = ".const_ti_sysbios_gates_GateMutex_Module__loggerDefined__C"
@@ -3728,6 +3798,139 @@ __FAR__ const CT__ti_sysbios_hal_Hwi_E_stackOverflow ti_sysbios_hal_Hwi_E_stackO
 
 
 /*
+ * ======== ti.sysbios.heaps.HeapCallback INITIALIZERS ========
+ */
+
+/* Object__DESC__C */
+__FAR__ const xdc_runtime_Core_ObjDesc ti_sysbios_heaps_HeapCallback_Object__DESC__C;
+
+/* Object__PARAMS__C */
+#pragma location = ".const_ti_sysbios_heaps_HeapCallback_Object__PARAMS__C"
+__FAR__ const ti_sysbios_heaps_HeapCallback_Params ti_sysbios_heaps_HeapCallback_Object__PARAMS__C = {
+    sizeof (ti_sysbios_heaps_HeapCallback_Params), /* __size */
+    0, /* __self */
+    0, /* __fxns */
+    (xdc_runtime_IInstance_Params*)&ti_sysbios_heaps_HeapCallback_Object__PARAMS__C.__iprms, /* instance */
+    ((xdc_UArg)(0x0)),  /* arg */
+    {
+        sizeof (xdc_runtime_IInstance_Params), /* __size */
+        0,  /* name */
+    },  /* instance */
+};
+
+/* Module__root__V */
+ti_sysbios_heaps_HeapCallback_Module__ ti_sysbios_heaps_HeapCallback_Module__root__V = {
+    {&ti_sysbios_heaps_HeapCallback_Module__root__V.link,  /* link.next */
+    &ti_sysbios_heaps_HeapCallback_Module__root__V.link},  /* link.prev */
+};
+
+/* Object__table__V */
+ti_sysbios_heaps_HeapCallback_Object__ ti_sysbios_heaps_HeapCallback_Object__table__V[1] = {
+    {/* instance#0 */
+        &ti_sysbios_heaps_HeapCallback_Module__FXNS__C,
+        ((xdc_UArg)(0x0)),  /* context */
+        ((xdc_UArg)(0x1)),  /* arg */
+    },
+};
+
+/* Module__diagsEnabled__C */
+#pragma location = ".const_ti_sysbios_heaps_HeapCallback_Module__diagsEnabled__C"
+__FAR__ const CT__ti_sysbios_heaps_HeapCallback_Module__diagsEnabled ti_sysbios_heaps_HeapCallback_Module__diagsEnabled__C = (xdc_Bits32)0x90;
+
+/* Module__diagsIncluded__C */
+#pragma location = ".const_ti_sysbios_heaps_HeapCallback_Module__diagsIncluded__C"
+__FAR__ const CT__ti_sysbios_heaps_HeapCallback_Module__diagsIncluded ti_sysbios_heaps_HeapCallback_Module__diagsIncluded__C = (xdc_Bits32)0x90;
+
+/* Module__diagsMask__C */
+#pragma location = ".const_ti_sysbios_heaps_HeapCallback_Module__diagsMask__C"
+__FAR__ const CT__ti_sysbios_heaps_HeapCallback_Module__diagsMask ti_sysbios_heaps_HeapCallback_Module__diagsMask__C = ((CT__ti_sysbios_heaps_HeapCallback_Module__diagsMask)0);
+
+/* Module__gateObj__C */
+#pragma location = ".const_ti_sysbios_heaps_HeapCallback_Module__gateObj__C"
+__FAR__ const CT__ti_sysbios_heaps_HeapCallback_Module__gateObj ti_sysbios_heaps_HeapCallback_Module__gateObj__C = ((CT__ti_sysbios_heaps_HeapCallback_Module__gateObj)0);
+
+/* Module__gatePrms__C */
+#pragma location = ".const_ti_sysbios_heaps_HeapCallback_Module__gatePrms__C"
+__FAR__ const CT__ti_sysbios_heaps_HeapCallback_Module__gatePrms ti_sysbios_heaps_HeapCallback_Module__gatePrms__C = ((CT__ti_sysbios_heaps_HeapCallback_Module__gatePrms)0);
+
+/* Module__id__C */
+#pragma location = ".const_ti_sysbios_heaps_HeapCallback_Module__id__C"
+__FAR__ const CT__ti_sysbios_heaps_HeapCallback_Module__id ti_sysbios_heaps_HeapCallback_Module__id__C = (xdc_Bits16)0x2e;
+
+/* Module__loggerDefined__C */
+#pragma location = ".const_ti_sysbios_heaps_HeapCallback_Module__loggerDefined__C"
+__FAR__ const CT__ti_sysbios_heaps_HeapCallback_Module__loggerDefined ti_sysbios_heaps_HeapCallback_Module__loggerDefined__C = 0;
+
+/* Module__loggerObj__C */
+#pragma location = ".const_ti_sysbios_heaps_HeapCallback_Module__loggerObj__C"
+__FAR__ const CT__ti_sysbios_heaps_HeapCallback_Module__loggerObj ti_sysbios_heaps_HeapCallback_Module__loggerObj__C = ((CT__ti_sysbios_heaps_HeapCallback_Module__loggerObj)0);
+
+/* Module__loggerFxn0__C */
+#pragma location = ".const_ti_sysbios_heaps_HeapCallback_Module__loggerFxn0__C"
+__FAR__ const CT__ti_sysbios_heaps_HeapCallback_Module__loggerFxn0 ti_sysbios_heaps_HeapCallback_Module__loggerFxn0__C = ((CT__ti_sysbios_heaps_HeapCallback_Module__loggerFxn0)0);
+
+/* Module__loggerFxn1__C */
+#pragma location = ".const_ti_sysbios_heaps_HeapCallback_Module__loggerFxn1__C"
+__FAR__ const CT__ti_sysbios_heaps_HeapCallback_Module__loggerFxn1 ti_sysbios_heaps_HeapCallback_Module__loggerFxn1__C = ((CT__ti_sysbios_heaps_HeapCallback_Module__loggerFxn1)0);
+
+/* Module__loggerFxn2__C */
+#pragma location = ".const_ti_sysbios_heaps_HeapCallback_Module__loggerFxn2__C"
+__FAR__ const CT__ti_sysbios_heaps_HeapCallback_Module__loggerFxn2 ti_sysbios_heaps_HeapCallback_Module__loggerFxn2__C = ((CT__ti_sysbios_heaps_HeapCallback_Module__loggerFxn2)0);
+
+/* Module__loggerFxn4__C */
+#pragma location = ".const_ti_sysbios_heaps_HeapCallback_Module__loggerFxn4__C"
+__FAR__ const CT__ti_sysbios_heaps_HeapCallback_Module__loggerFxn4 ti_sysbios_heaps_HeapCallback_Module__loggerFxn4__C = ((CT__ti_sysbios_heaps_HeapCallback_Module__loggerFxn4)0);
+
+/* Module__loggerFxn8__C */
+#pragma location = ".const_ti_sysbios_heaps_HeapCallback_Module__loggerFxn8__C"
+__FAR__ const CT__ti_sysbios_heaps_HeapCallback_Module__loggerFxn8 ti_sysbios_heaps_HeapCallback_Module__loggerFxn8__C = ((CT__ti_sysbios_heaps_HeapCallback_Module__loggerFxn8)0);
+
+/* Object__count__C */
+#pragma location = ".const_ti_sysbios_heaps_HeapCallback_Object__count__C"
+__FAR__ const CT__ti_sysbios_heaps_HeapCallback_Object__count ti_sysbios_heaps_HeapCallback_Object__count__C = 1;
+
+/* Object__heap__C */
+#pragma location = ".const_ti_sysbios_heaps_HeapCallback_Object__heap__C"
+__FAR__ const CT__ti_sysbios_heaps_HeapCallback_Object__heap ti_sysbios_heaps_HeapCallback_Object__heap__C = 0;
+
+/* Object__sizeof__C */
+#pragma location = ".const_ti_sysbios_heaps_HeapCallback_Object__sizeof__C"
+__FAR__ const CT__ti_sysbios_heaps_HeapCallback_Object__sizeof ti_sysbios_heaps_HeapCallback_Object__sizeof__C = sizeof(ti_sysbios_heaps_HeapCallback_Object__);
+
+/* Object__table__C */
+#pragma location = ".const_ti_sysbios_heaps_HeapCallback_Object__table__C"
+__FAR__ const CT__ti_sysbios_heaps_HeapCallback_Object__table ti_sysbios_heaps_HeapCallback_Object__table__C = ti_sysbios_heaps_HeapCallback_Object__table__V;
+
+/* allocInstFxn__C */
+#pragma location = ".const_ti_sysbios_heaps_HeapCallback_allocInstFxn__C"
+__FAR__ const CT__ti_sysbios_heaps_HeapCallback_allocInstFxn ti_sysbios_heaps_HeapCallback_allocInstFxn__C = ((CT__ti_sysbios_heaps_HeapCallback_allocInstFxn)((xdc_Fxn)osalHeapAllocFxn));
+
+/* createInstFxn__C */
+#pragma location = ".const_ti_sysbios_heaps_HeapCallback_createInstFxn__C"
+__FAR__ const CT__ti_sysbios_heaps_HeapCallback_createInstFxn ti_sysbios_heaps_HeapCallback_createInstFxn__C = ((CT__ti_sysbios_heaps_HeapCallback_createInstFxn)((xdc_Fxn)ti_sysbios_heaps_HeapCallback_defaultCreate));
+
+/* deleteInstFxn__C */
+#pragma location = ".const_ti_sysbios_heaps_HeapCallback_deleteInstFxn__C"
+__FAR__ const CT__ti_sysbios_heaps_HeapCallback_deleteInstFxn ti_sysbios_heaps_HeapCallback_deleteInstFxn__C = ((CT__ti_sysbios_heaps_HeapCallback_deleteInstFxn)((xdc_Fxn)ti_sysbios_heaps_HeapCallback_defaultDelete));
+
+/* freeInstFxn__C */
+#pragma location = ".const_ti_sysbios_heaps_HeapCallback_freeInstFxn__C"
+__FAR__ const CT__ti_sysbios_heaps_HeapCallback_freeInstFxn ti_sysbios_heaps_HeapCallback_freeInstFxn__C = ((CT__ti_sysbios_heaps_HeapCallback_freeInstFxn)((xdc_Fxn)osalHeapFreeFxn));
+
+/* getStatsInstFxn__C */
+#pragma location = ".const_ti_sysbios_heaps_HeapCallback_getStatsInstFxn__C"
+__FAR__ const CT__ti_sysbios_heaps_HeapCallback_getStatsInstFxn ti_sysbios_heaps_HeapCallback_getStatsInstFxn__C = ((CT__ti_sysbios_heaps_HeapCallback_getStatsInstFxn)((xdc_Fxn)osalHeapGetStatsFxn));
+
+/* initInstFxn__C */
+#pragma location = ".const_ti_sysbios_heaps_HeapCallback_initInstFxn__C"
+__FAR__ const CT__ti_sysbios_heaps_HeapCallback_initInstFxn ti_sysbios_heaps_HeapCallback_initInstFxn__C = ((CT__ti_sysbios_heaps_HeapCallback_initInstFxn)((xdc_Fxn)osalHeapInitFxn));
+
+/* isBlockingInstFxn__C */
+#pragma location = ".const_ti_sysbios_heaps_HeapCallback_isBlockingInstFxn__C"
+__FAR__ const CT__ti_sysbios_heaps_HeapCallback_isBlockingInstFxn ti_sysbios_heaps_HeapCallback_isBlockingInstFxn__C = ((CT__ti_sysbios_heaps_HeapCallback_isBlockingInstFxn)((xdc_Fxn)osalHeapIsBlockingFxn));
+
+
+/*
  * ======== ti.sysbios.heaps.HeapMem INITIALIZERS ========
  */
 
@@ -3748,27 +3951,10 @@ __FAR__ const ti_sysbios_heaps_HeapMem_Params ti_sysbios_heaps_HeapMem_Object__P
     },  /* instance */
 };
 
-/* --> ti_sysbios_heaps_HeapMem_Instance_State_0_buf__A */
-__T1_ti_sysbios_heaps_HeapMem_Instance_State__buf ti_sysbios_heaps_HeapMem_Instance_State_0_buf__A[1664];
-
 /* Module__root__V */
 ti_sysbios_heaps_HeapMem_Module__ ti_sysbios_heaps_HeapMem_Module__root__V = {
     {&ti_sysbios_heaps_HeapMem_Module__root__V.link,  /* link.next */
     &ti_sysbios_heaps_HeapMem_Module__root__V.link},  /* link.prev */
-};
-
-/* Object__table__V */
-ti_sysbios_heaps_HeapMem_Object__ ti_sysbios_heaps_HeapMem_Object__table__V[1] = {
-    {/* instance#0 */
-        &ti_sysbios_heaps_HeapMem_Module__FXNS__C,
-        ((xdc_UArg)(0x8)),  /* align */
-        ((void*)ti_sysbios_heaps_HeapMem_Instance_State_0_buf__A),  /* buf */
-        {
-            ((ti_sysbios_heaps_HeapMem_Header*)0),  /* next */
-            ((xdc_UArg)(0x680)),  /* size */
-        },  /* head */
-        (xdc_SizeT)0x8,  /* minBlockAlign */
-    },
 };
 
 /* Module__diagsEnabled__C */
@@ -3785,7 +3971,7 @@ __FAR__ const CT__ti_sysbios_heaps_HeapMem_Module__diagsMask ti_sysbios_heaps_He
 
 /* Module__gateObj__C */
 #pragma location = ".const_ti_sysbios_heaps_HeapMem_Module__gateObj__C"
-__FAR__ const CT__ti_sysbios_heaps_HeapMem_Module__gateObj ti_sysbios_heaps_HeapMem_Module__gateObj__C = ((CT__ti_sysbios_heaps_HeapMem_Module__gateObj)((void*)(xdc_runtime_IGateProvider_Handle)&ti_sysbios_gates_GateMutex_Object__table__V[0]));
+__FAR__ const CT__ti_sysbios_heaps_HeapMem_Module__gateObj ti_sysbios_heaps_HeapMem_Module__gateObj__C = ((CT__ti_sysbios_heaps_HeapMem_Module__gateObj)((const void*)(xdc_runtime_IGateProvider_Handle)&ti_sysbios_gates_GateMutex_Object__table__V[0]));
 
 /* Module__gatePrms__C */
 #pragma location = ".const_ti_sysbios_heaps_HeapMem_Module__gatePrms__C"
@@ -3793,7 +3979,7 @@ __FAR__ const CT__ti_sysbios_heaps_HeapMem_Module__gatePrms ti_sysbios_heaps_Hea
 
 /* Module__id__C */
 #pragma location = ".const_ti_sysbios_heaps_HeapMem_Module__id__C"
-__FAR__ const CT__ti_sysbios_heaps_HeapMem_Module__id ti_sysbios_heaps_HeapMem_Module__id__C = (xdc_Bits16)0x2f;
+__FAR__ const CT__ti_sysbios_heaps_HeapMem_Module__id ti_sysbios_heaps_HeapMem_Module__id__C = (xdc_Bits16)0x2d;
 
 /* Module__loggerDefined__C */
 #pragma location = ".const_ti_sysbios_heaps_HeapMem_Module__loggerDefined__C"
@@ -3825,7 +4011,7 @@ __FAR__ const CT__ti_sysbios_heaps_HeapMem_Module__loggerFxn8 ti_sysbios_heaps_H
 
 /* Object__count__C */
 #pragma location = ".const_ti_sysbios_heaps_HeapMem_Object__count__C"
-__FAR__ const CT__ti_sysbios_heaps_HeapMem_Object__count ti_sysbios_heaps_HeapMem_Object__count__C = 1;
+__FAR__ const CT__ti_sysbios_heaps_HeapMem_Object__count ti_sysbios_heaps_HeapMem_Object__count__C = 0;
 
 /* Object__heap__C */
 #pragma location = ".const_ti_sysbios_heaps_HeapMem_Object__heap__C"
@@ -3837,7 +4023,7 @@ __FAR__ const CT__ti_sysbios_heaps_HeapMem_Object__sizeof ti_sysbios_heaps_HeapM
 
 /* Object__table__C */
 #pragma location = ".const_ti_sysbios_heaps_HeapMem_Object__table__C"
-__FAR__ const CT__ti_sysbios_heaps_HeapMem_Object__table ti_sysbios_heaps_HeapMem_Object__table__C = ti_sysbios_heaps_HeapMem_Object__table__V;
+__FAR__ const CT__ti_sysbios_heaps_HeapMem_Object__table ti_sysbios_heaps_HeapMem_Object__table__C = 0;
 
 /* A_zeroBlock__C */
 #pragma location = ".const_ti_sysbios_heaps_HeapMem_A_zeroBlock__C"
@@ -3853,7 +4039,7 @@ __FAR__ const CT__ti_sysbios_heaps_HeapMem_A_align ti_sysbios_heaps_HeapMem_A_al
 
 /* E_memory__C */
 #pragma location = ".const_ti_sysbios_heaps_HeapMem_E_memory__C"
-__FAR__ const CT__ti_sysbios_heaps_HeapMem_E_memory ti_sysbios_heaps_HeapMem_E_memory__C = (((xdc_runtime_Error_Id)35) << 16 | 0);
+__FAR__ const CT__ti_sysbios_heaps_HeapMem_E_memory ti_sysbios_heaps_HeapMem_E_memory__C = (((xdc_runtime_Error_Id)34) << 16 | 0);
 
 /* A_invalidFree__C */
 #pragma location = ".const_ti_sysbios_heaps_HeapMem_A_invalidFree__C"
@@ -4277,11 +4463,11 @@ __FAR__ const CT__ti_sysbios_knl_Idle_Object__table ti_sysbios_knl_Idle_Object__
 
 /* funcList__C */
 #pragma location = ".const_ti_sysbios_knl_Idle_funcList__C"
-__FAR__ const CT__ti_sysbios_knl_Idle_funcList ti_sysbios_knl_Idle_funcList__C = {1, (ti_sysbios_knl_Idle_funcList__A)};
+__FAR__ const CT__ti_sysbios_knl_Idle_funcList ti_sysbios_knl_Idle_funcList__C = {1, ((__T1_ti_sysbios_knl_Idle_funcList *)ti_sysbios_knl_Idle_funcList__A)};
 
 /* coreList__C */
 #pragma location = ".const_ti_sysbios_knl_Idle_coreList__C"
-__FAR__ const CT__ti_sysbios_knl_Idle_coreList ti_sysbios_knl_Idle_coreList__C = {1, (ti_sysbios_knl_Idle_coreList__A)};
+__FAR__ const CT__ti_sysbios_knl_Idle_coreList ti_sysbios_knl_Idle_coreList__C = {1, ((__T1_ti_sysbios_knl_Idle_coreList *)ti_sysbios_knl_Idle_coreList__A)};
 
 
 /*
@@ -6005,7 +6191,7 @@ __FAR__ const CT__xdc_runtime_Main_Module__diagsMask xdc_runtime_Main_Module__di
 
 /* Module__gateObj__C */
 #pragma location = ".const_xdc_runtime_Main_Module__gateObj__C"
-__FAR__ const CT__xdc_runtime_Main_Module__gateObj xdc_runtime_Main_Module__gateObj__C = ((CT__xdc_runtime_Main_Module__gateObj)((void*)(xdc_runtime_IGateProvider_Handle)&ti_sysbios_gates_GateHwi_Object__table__V[0]));
+__FAR__ const CT__xdc_runtime_Main_Module__gateObj xdc_runtime_Main_Module__gateObj__C = ((CT__xdc_runtime_Main_Module__gateObj)((const void*)(xdc_runtime_IGateProvider_Handle)&ti_sysbios_gates_GateHwi_Object__table__V[0]));
 
 /* Module__gatePrms__C */
 #pragma location = ".const_xdc_runtime_Main_Module__gatePrms__C"
@@ -6152,7 +6338,7 @@ __FAR__ const CT__xdc_runtime_Memory_Object__table xdc_runtime_Memory_Object__ta
 
 /* defaultHeapInstance__C */
 #pragma location = ".const_xdc_runtime_Memory_defaultHeapInstance__C"
-__FAR__ const CT__xdc_runtime_Memory_defaultHeapInstance xdc_runtime_Memory_defaultHeapInstance__C = (xdc_runtime_IHeap_Handle)&ti_sysbios_heaps_HeapMem_Object__table__V[0];
+__FAR__ const CT__xdc_runtime_Memory_defaultHeapInstance xdc_runtime_Memory_defaultHeapInstance__C = (xdc_runtime_IHeap_Handle)&ti_sysbios_heaps_HeapCallback_Object__table__V[0];
 
 
 /*
@@ -6269,15 +6455,15 @@ xdc_runtime_Startup_Module_State__ xdc_runtime_Startup_Module__state__V = {
 /* --> xdc_runtime_Startup_firstFxns__A */
 #pragma location = ".const_xdc_runtime_Startup_firstFxns__A"
 const __T1_xdc_runtime_Startup_firstFxns xdc_runtime_Startup_firstFxns__A[4] = {
-    ((xdc_Void(*)(xdc_Void))((xdc_Fxn)ti_sysbios_heaps_HeapMem_init__I)),  /* [0] */
-    ((xdc_Void(*)(xdc_Void))((xdc_Fxn)ti_sysbios_family_arm_m3_Hwi_initIsrStackSize)),  /* [1] */
+    ((xdc_Void(*)(xdc_Void))((xdc_Fxn)ti_sysbios_family_arm_m3_Hwi_initIsrStackSize)),  /* [0] */
+    ((xdc_Void(*)(xdc_Void))((xdc_Fxn)ti_sysbios_heaps_HeapMem_init__I)),  /* [1] */
     ((xdc_Void(*)(xdc_Void))((xdc_Fxn)ti_sysbios_family_arm_m3_Hwi_initNVIC__E)),  /* [2] */
     ((xdc_Void(*)(xdc_Void))((xdc_Fxn)ti_sysbios_hal_Hwi_initStack)),  /* [3] */
 };
 
 /* --> xdc_runtime_Startup_sfxnTab__A */
 #pragma location = ".const_xdc_runtime_Startup_sfxnTab__A"
-const __T1_xdc_runtime_Startup_sfxnTab xdc_runtime_Startup_sfxnTab__A[9] = {
+const __T1_xdc_runtime_Startup_sfxnTab xdc_runtime_Startup_sfxnTab__A[10] = {
     ((xdc_Int(*)(xdc_Int))((xdc_Fxn)xdc_runtime_System_Module_startup__E)),  /* [0] */
     ((xdc_Int(*)(xdc_Int))((xdc_Fxn)ti_sysbios_knl_Clock_Module_startup__E)),  /* [1] */
     ((xdc_Int(*)(xdc_Int))((xdc_Fxn)ti_sysbios_knl_Mailbox_Module_startup__E)),  /* [2] */
@@ -6287,11 +6473,12 @@ const __T1_xdc_runtime_Startup_sfxnTab xdc_runtime_Startup_sfxnTab__A[9] = {
     ((xdc_Int(*)(xdc_Int))((xdc_Fxn)ti_sysbios_family_arm_cc26xx_Timer_Module_startup__E)),  /* [6] */
     ((xdc_Int(*)(xdc_Int))((xdc_Fxn)ti_sysbios_family_arm_cc26xx_TimestampProvider_Module_startup__E)),  /* [7] */
     ((xdc_Int(*)(xdc_Int))((xdc_Fxn)ti_sysbios_hal_Hwi_Module_startup__E)),  /* [8] */
+    ((xdc_Int(*)(xdc_Int))((xdc_Fxn)ti_sysbios_heaps_HeapCallback_Module_startup__E)),  /* [9] */
 };
 
 /* --> xdc_runtime_Startup_sfxnRts__A */
 #pragma location = ".const_xdc_runtime_Startup_sfxnRts__A"
-const __T1_xdc_runtime_Startup_sfxnRts xdc_runtime_Startup_sfxnRts__A[9] = {
+const __T1_xdc_runtime_Startup_sfxnRts xdc_runtime_Startup_sfxnRts__A[10] = {
     1,  /* [0] */
     0,  /* [1] */
     0,  /* [2] */
@@ -6301,6 +6488,7 @@ const __T1_xdc_runtime_Startup_sfxnRts xdc_runtime_Startup_sfxnRts__A[9] = {
     0,  /* [6] */
     1,  /* [7] */
     0,  /* [8] */
+    1,  /* [9] */
 };
 
 /* Module__diagsEnabled__C */
@@ -6377,7 +6565,7 @@ __FAR__ const CT__xdc_runtime_Startup_maxPasses xdc_runtime_Startup_maxPasses__C
 
 /* firstFxns__C */
 #pragma location = ".const_xdc_runtime_Startup_firstFxns__C"
-__FAR__ const CT__xdc_runtime_Startup_firstFxns xdc_runtime_Startup_firstFxns__C = {4, (xdc_runtime_Startup_firstFxns__A)};
+__FAR__ const CT__xdc_runtime_Startup_firstFxns xdc_runtime_Startup_firstFxns__C = {4, ((__T1_xdc_runtime_Startup_firstFxns *)xdc_runtime_Startup_firstFxns__A)};
 
 /* lastFxns__C */
 #pragma location = ".const_xdc_runtime_Startup_lastFxns__C"
@@ -6525,7 +6713,7 @@ __FAR__ const CT__xdc_runtime_System_Module__diagsMask xdc_runtime_System_Module
 
 /* Module__gateObj__C */
 #pragma location = ".const_xdc_runtime_System_Module__gateObj__C"
-__FAR__ const CT__xdc_runtime_System_Module__gateObj xdc_runtime_System_Module__gateObj__C = ((CT__xdc_runtime_System_Module__gateObj)((void*)(xdc_runtime_IGateProvider_Handle)&ti_sysbios_gates_GateHwi_Object__table__V[0]));
+__FAR__ const CT__xdc_runtime_System_Module__gateObj xdc_runtime_System_Module__gateObj__C = ((CT__xdc_runtime_System_Module__gateObj)((const void*)(xdc_runtime_IGateProvider_Handle)&ti_sysbios_gates_GateHwi_Object__table__V[0]));
 
 /* Module__gatePrms__C */
 #pragma location = ".const_xdc_runtime_System_Module__gatePrms__C"
@@ -7124,6 +7312,25 @@ __FAR__ const xdc_runtime_Core_ObjDesc ti_sysbios_hal_Hwi_Object__DESC__C = {
 
 
 /*
+ * ======== ti.sysbios.heaps.HeapCallback OBJECT DESCRIPTOR ========
+ */
+
+/* Object__DESC__C */
+typedef struct { ti_sysbios_heaps_HeapCallback_Object2__ s0; char c; } ti_sysbios_heaps_HeapCallback___S1;
+#pragma location = ".const_ti_sysbios_heaps_HeapCallback_Object__DESC__C"
+__FAR__ const xdc_runtime_Core_ObjDesc ti_sysbios_heaps_HeapCallback_Object__DESC__C = {
+    (xdc_CPtr)&ti_sysbios_heaps_HeapCallback_Module__FXNS__C, /* fxnTab */
+    &ti_sysbios_heaps_HeapCallback_Module__root__V.link, /* modLink */
+    sizeof(ti_sysbios_heaps_HeapCallback___S1) - sizeof(ti_sysbios_heaps_HeapCallback_Object2__), /* objAlign */
+    0, /* objHeap */
+    0, /* objName */
+    sizeof(ti_sysbios_heaps_HeapCallback_Object2__), /* objSize */
+    (xdc_CPtr)&ti_sysbios_heaps_HeapCallback_Object__PARAMS__C, /* prmsInit */
+    sizeof(ti_sysbios_heaps_HeapCallback_Params), /* prmsSize */
+};
+
+
+/*
  * ======== ti.sysbios.heaps.HeapMem OBJECT DESCRIPTOR ========
  */
 
@@ -7331,6 +7538,248 @@ xdc_Bool ti_sysbios_family_arm_m3_IntrinsicsSupport_Module__startupDone__S( void
     return 1;
 }
 
+
+
+/*
+ * ======== ti.sysbios.heaps.HeapCallback SYSTEM FUNCTIONS ========
+ */
+
+/* per-module runtime symbols */
+#undef Module__MID
+#ifdef ti_sysbios_heaps_HeapCallback_Module__id__CR
+#define Module__MID (*((CT__ti_sysbios_heaps_HeapCallback_Module__id *)(xdcRomConstPtr + ti_sysbios_heaps_HeapCallback_Module__id__C_offset)))
+#else
+#define Module__MID ti_sysbios_heaps_HeapCallback_Module__id__C
+#endif
+
+#undef Module__DGSINCL
+#ifdef ti_sysbios_heaps_HeapCallback_Module__diagsIncluded__CR
+#define Module__DGSINCL (*((CT__ti_sysbios_heaps_HeapCallback_Module__diagsIncluded *)(xdcRomConstPtr + ti_sysbios_heaps_HeapCallback_Module__diagsIncluded__C_offset)))
+#else
+#define Module__DGSINCL ti_sysbios_heaps_HeapCallback_Module__diagsIncluded__C
+#endif
+
+#undef Module__DGSENAB
+#ifdef ti_sysbios_heaps_HeapCallback_Module__diagsEnabled__CR
+#define Module__DGSENAB (*((CT__ti_sysbios_heaps_HeapCallback_Module__diagsEnabled *)(xdcRomConstPtr + ti_sysbios_heaps_HeapCallback_Module__diagsEnabled__C_offset)))
+#else
+#define Module__DGSENAB ti_sysbios_heaps_HeapCallback_Module__diagsEnabled__C
+#endif
+
+#undef Module__DGSMASK
+#ifdef ti_sysbios_heaps_HeapCallback_Module__diagsMask__CR
+#define Module__DGSMASK (*((CT__ti_sysbios_heaps_HeapCallback_Module__diagsMask *)(xdcRomConstPtr + ti_sysbios_heaps_HeapCallback_Module__diagsMask__C_offset)))
+#else
+#define Module__DGSMASK ti_sysbios_heaps_HeapCallback_Module__diagsMask__C
+#endif
+
+#undef Module__LOGDEF
+#ifdef ti_sysbios_heaps_HeapCallback_Module__loggerDefined__CR
+#define Module__LOGDEF (*((CT__ti_sysbios_heaps_HeapCallback_Module__loggerDefined *)(xdcRomConstPtr + ti_sysbios_heaps_HeapCallback_Module__loggerDefined__C_offset)))
+#else
+#define Module__LOGDEF ti_sysbios_heaps_HeapCallback_Module__loggerDefined__C
+#endif
+
+#undef Module__LOGOBJ
+#ifdef ti_sysbios_heaps_HeapCallback_Module__loggerObj__CR
+#define Module__LOGOBJ ti_sysbios_heaps_HeapCallback_Module__loggerObj__R
+#define Module__LOGOBJ (*((CT__ti_sysbios_heaps_HeapCallback_Module__loggerObj *)(xdcRomConstPtr + ti_sysbios_heaps_HeapCallback_Module__loggerObj__C_offset)))
+#else
+#define Module__LOGOBJ ti_sysbios_heaps_HeapCallback_Module__loggerObj__C
+#endif
+
+#undef Module__LOGFXN0
+#ifdef ti_sysbios_heaps_HeapCallback_Module__loggerFxn0__CR
+#define Module__LOGFXN0 (*((CT__ti_sysbios_heaps_HeapCallback_Module__loggerFxn0 *)(xdcRomConstPtr + ti_sysbios_heaps_HeapCallback_Module__loggerFxn0__C_offset)))
+#else
+#define Module__LOGFXN0 ti_sysbios_heaps_HeapCallback_Module__loggerFxn0__C
+#endif
+
+#undef Module__LOGFXN1
+#ifdef ti_sysbios_heaps_HeapCallback_Module__loggerFxn1__CR
+#define Module__LOGFXN1 (*((CT__ti_sysbios_heaps_HeapCallback_Module__loggerFxn1 *)(xdcRomConstPtr + ti_sysbios_heaps_HeapCallback_Module__loggerFxn1__C_offset)))
+#else
+#define Module__LOGFXN1 ti_sysbios_heaps_HeapCallback_Module__loggerFxn1__C
+#endif
+
+#undef Module__LOGFXN2
+#ifdef ti_sysbios_heaps_HeapCallback_Module__loggerFxn2__CR
+#define Module__LOGFXN2 (*((CT__ti_sysbios_heaps_HeapCallback_Module__loggerFxn2 *)(xdcRomConstPtr + ti_sysbios_heaps_HeapCallback_Module__loggerFxn2__C_offset)))
+#else
+#define Module__LOGFXN2 ti_sysbios_heaps_HeapCallback_Module__loggerFxn2__C
+#endif
+
+#undef Module__LOGFXN4
+#ifdef ti_sysbios_heaps_HeapCallback_Module__loggerFxn4__CR
+#define Module__LOGFXN4 (*((CT__ti_sysbios_heaps_HeapCallback_Module__loggerFxn4 *)(xdcRomConstPtr + ti_sysbios_heaps_HeapCallback_Module__loggerFxn4__C_offset)))
+#else
+#define Module__LOGFXN4 ti_sysbios_heaps_HeapCallback_Module__loggerFxn4__C
+#endif
+
+#undef Module__LOGFXN8
+#ifdef ti_sysbios_heaps_HeapCallback_Module__loggerFxn8__CR
+#define Module__LOGFXN8 (*((CT__ti_sysbios_heaps_HeapCallback_Module__loggerFxn8 *)(xdcRomConstPtr + ti_sysbios_heaps_HeapCallback_Module__loggerFxn8__C_offset)))
+#else
+#define Module__LOGFXN8 ti_sysbios_heaps_HeapCallback_Module__loggerFxn8__C
+#endif
+
+#undef Module__G_OBJ
+#ifdef ti_sysbios_heaps_HeapCallback_Module__gateObj__CR
+#define Module__G_OBJ (*((CT__ti_sysbios_heaps_HeapCallback_Module__gateObj *)(xdcRomConstPtr + ti_sysbios_heaps_HeapCallback_Module__gateObj__C_offset)))
+#else
+#define Module__G_OBJ ti_sysbios_heaps_HeapCallback_Module__gateObj__C
+#endif
+
+#undef Module__G_PRMS
+#ifdef ti_sysbios_heaps_HeapCallback_Module__gatePrms__CR
+#define Module__G_PRMS (*((CT__ti_sysbios_heaps_HeapCallback_Module__gatePrms *)(xdcRomConstPtr + ti_sysbios_heaps_HeapCallback_Module__gatePrms__C_offset)))
+#else
+#define Module__G_PRMS ti_sysbios_heaps_HeapCallback_Module__gatePrms__C
+#endif
+
+#undef Module__GP_create
+#define Module__GP_create ti_sysbios_heaps_HeapCallback_Module_GateProxy_create
+#undef Module__GP_delete
+#define Module__GP_delete ti_sysbios_heaps_HeapCallback_Module_GateProxy_delete
+#undef Module__GP_enter
+#define Module__GP_enter ti_sysbios_heaps_HeapCallback_Module_GateProxy_enter
+#undef Module__GP_leave
+#define Module__GP_leave ti_sysbios_heaps_HeapCallback_Module_GateProxy_leave
+#undef Module__GP_query
+#define Module__GP_query ti_sysbios_heaps_HeapCallback_Module_GateProxy_query
+
+/* Module__startupDone__S */
+xdc_Bool ti_sysbios_heaps_HeapCallback_Module__startupDone__S( void )
+{
+    return ti_sysbios_heaps_HeapCallback_Module__startupDone__F();
+}
+
+/* Handle__label__S */
+xdc_runtime_Types_Label *ti_sysbios_heaps_HeapCallback_Handle__label__S(xdc_Ptr obj, xdc_runtime_Types_Label *lab) 
+{
+    lab->handle = obj;
+    lab->modId = 46;
+    xdc_runtime_Core_assignLabel(lab, 0, 0);
+
+    return lab;
+}
+
+/* Params__init__S */
+xdc_Void ti_sysbios_heaps_HeapCallback_Params__init__S( xdc_Ptr prms, const void *src, xdc_SizeT psz, xdc_SizeT isz ) 
+{
+    xdc_runtime_Core_assignParams__I(prms, (xdc_CPtr)(src ? src : &ti_sysbios_heaps_HeapCallback_Object__PARAMS__C), psz, isz);
+}
+
+/* Object__get__S */
+xdc_Ptr ti_sysbios_heaps_HeapCallback_Object__get__S(xdc_Ptr oa, xdc_Int i)
+{
+    if (oa) {
+        return ((ti_sysbios_heaps_HeapCallback_Object__ *)oa) + i;
+    }
+
+    if (ti_sysbios_heaps_HeapCallback_Object__count__C == 0) {
+        return NULL;
+    }
+
+    /* the bogus 'const' in the cast suppresses Klocwork MISRA complaints */
+    return ((ti_sysbios_heaps_HeapCallback_Object__ * const)ti_sysbios_heaps_HeapCallback_Object__table__C) + i;
+}
+
+/* Object__first__S */
+xdc_Ptr ti_sysbios_heaps_HeapCallback_Object__first__S( void ) 
+{
+    xdc_runtime_Types_InstHdr *iHdr = (xdc_runtime_Types_InstHdr *)ti_sysbios_heaps_HeapCallback_Module__root__V.link.next;
+
+    if (iHdr != (xdc_runtime_Types_InstHdr *)&ti_sysbios_heaps_HeapCallback_Module__root__V.link) {
+        return iHdr + 1;
+    }
+    else {
+        return NULL;
+    }
+}
+
+/* Object__next__S */
+xdc_Ptr ti_sysbios_heaps_HeapCallback_Object__next__S( xdc_Ptr obj ) 
+{
+    xdc_runtime_Types_InstHdr *iHdr = ((xdc_runtime_Types_InstHdr *)obj) - 1;
+
+    if (iHdr->link.next != (xdc_runtime_Types_Link *)&ti_sysbios_heaps_HeapCallback_Module__root__V.link) {
+        return (xdc_runtime_Types_InstHdr *)(iHdr->link.next) + 1;
+    }
+    else {
+        return NULL;
+    }
+}
+
+/* Object__create__S */
+xdc_Ptr ti_sysbios_heaps_HeapCallback_Object__create__S (
+    xdc_CPtr __aa,
+    const xdc_UChar *__paramsPtr,
+    xdc_SizeT __psz,
+    xdc_runtime_Error_Block *__eb)
+{
+    ti_sysbios_heaps_HeapCallback_Params __prms;
+    ti_sysbios_heaps_HeapCallback_Object *__obj;
+
+    /* common instance initialization */
+    __obj = xdc_runtime_Core_createObject__I(&ti_sysbios_heaps_HeapCallback_Object__DESC__C, NULL, &__prms, (xdc_CPtr)__paramsPtr, 0, __eb);
+    if (__obj == NULL) {
+        return NULL;
+    }
+
+
+    /* module-specific initialization */
+    ti_sysbios_heaps_HeapCallback_Instance_init__E(__obj, &__prms);
+    return __obj;
+}
+
+/* create */
+ti_sysbios_heaps_HeapCallback_Handle ti_sysbios_heaps_HeapCallback_create( const ti_sysbios_heaps_HeapCallback_Params *__paramsPtr, xdc_runtime_Error_Block *__eb )
+{
+    ti_sysbios_heaps_HeapCallback_Params __prms;
+    ti_sysbios_heaps_HeapCallback_Object *__obj;
+
+
+    /* common instance initialization */
+    __obj = xdc_runtime_Core_createObject__I(&ti_sysbios_heaps_HeapCallback_Object__DESC__C, NULL, &__prms, (xdc_CPtr)__paramsPtr, 0, __eb);
+    if (__obj == NULL) {
+        return NULL;
+    }
+
+    /* module-specific initialization */
+    ti_sysbios_heaps_HeapCallback_Instance_init__E(__obj, &__prms);
+    return __obj;
+}
+
+/* construct */
+void ti_sysbios_heaps_HeapCallback_construct(ti_sysbios_heaps_HeapCallback_Struct *__obj, const ti_sysbios_heaps_HeapCallback_Params *__paramsPtr )
+{
+    ti_sysbios_heaps_HeapCallback_Params __prms;
+
+    /* common instance initialization */
+    xdc_runtime_Core_constructObject__I(&ti_sysbios_heaps_HeapCallback_Object__DESC__C, __obj, &__prms, (xdc_CPtr)__paramsPtr, 0, NULL);
+
+    /* module-specific initialization */
+    ti_sysbios_heaps_HeapCallback_Instance_init__E((xdc_Ptr)__obj, &__prms);
+}
+
+/* destruct */
+void ti_sysbios_heaps_HeapCallback_destruct(ti_sysbios_heaps_HeapCallback_Struct *obj)
+{
+    xdc_runtime_Core_destructObject__I(&ti_sysbios_heaps_HeapCallback_Object__DESC__C, obj, (xdc_Fxn)ti_sysbios_heaps_HeapCallback_Instance_finalize__E, -1, TRUE);
+}
+
+/* Object__delete__S */
+xdc_Void ti_sysbios_heaps_HeapCallback_Object__delete__S( xdc_Ptr instp ) 
+{
+    xdc_runtime_Error_raiseX(NULL, ti_sysbios_heaps_HeapCallback_Module__id__C, NULL, 0, xdc_runtime_Error_E_generic, (xdc_IArg)"delete policy error", 0);
+}
+
+/* delete */
+void ti_sysbios_heaps_HeapCallback_delete(ti_sysbios_heaps_HeapCallback_Handle* instp)
+{
+    xdc_runtime_Error_raiseX(NULL, ti_sysbios_heaps_HeapCallback_Module__id__C, NULL, 0, xdc_runtime_Error_E_generic, (xdc_IArg)"delete policy error", 0);
+}
 
 
 /*
@@ -7665,4 +8114,13 @@ __FAR__ int (* volatile __xdc__init__addr)(void) = &__xdc__init;
 /*
  * ======== PROGRAM GLOBALS ========
  */
+
+
+#ifdef __GNUC__
+#ifndef __TI_COMPILER_VERSION__
+    __attribute__ ((externally_visible))
+#endif
+#endif
+const ti_sysbios_heaps_HeapCallback_Handle heap0 = (ti_sysbios_heaps_HeapCallback_Handle)((ti_sysbios_heaps_HeapCallback_Handle)&ti_sysbios_heaps_HeapCallback_Object__table__V[0]);
+
 

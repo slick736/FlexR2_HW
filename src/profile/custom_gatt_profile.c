@@ -66,7 +66,7 @@
 #include "gpioCustom.h"
 #include "main.h"
 
-#include "icall_api.h"
+#include "icall_ble_api.h"
 
 /*********************************************************************
  * MACROS
@@ -192,7 +192,7 @@ static gattCharCfg_t *customProfileChar4Config;
                                         
 // Simple Profile Characteristic 4 User Description
 //static uint8 simpleProfileChar4UserDesp[17] = "Characteristic 4";
-static uint8 customProfileChar4UserDesp[17] = "Char 4 - NotifyF";
+static uint8 customProfileChar4UserDesp[17] = "Notify Config";
 
 //=================================================================================================
 

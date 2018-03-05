@@ -109,7 +109,7 @@ uint8_t disconnectByInterrupt = 0;
 #include "gapbondmgr.h"
 
 #include "osal_snv.h"
-#include "icall_apimsg.h"
+#include "icall_ble_apimsg.h"
 
 #include "util.h"
 
@@ -132,7 +132,7 @@ uint8_t disconnectByInterrupt = 0;
 #include <driverlib/ioc.h>
 #endif // USE_FPGA | DEBUG_SW_TRACE
 
-#include "icall_api.h"
+#include "icall_ble_api.h"
 #include <ti/drivers/ADC.h>
 /*********************************************************************
  * CONSTANTS
@@ -1937,6 +1937,7 @@ void stopAdvertising(void){
 }
 
 //开始广播：这个方法仅有setSYSTEMWorkLevel(SYSTEM_ENERGY_LEVEL1)时才调用
+uint8_t hasSetDuration = 0;
 void startAdvertising(void){
   bleCycleCount = 127;
   //测试性亮灯（白灯亮为低功率发射模式，红灯亮为高功率发射模式）
@@ -1964,7 +1965,11 @@ void startAdvertising(void){
   advertEnabled = TRUE;
   //限制广播时间
   uint16_t advertDuration = ADVERT_DURATION;
-  GAP_SetParamValue(TGAP_LIM_ADV_TIMEOUT, advertDuration);
+  if(hasSetDuration == 0){
+    //1.50版的Stack，这个参数只能重复设置一次，否则会死机
+    GAP_SetParamValue(TGAP_LIM_ADV_TIMEOUT, advertDuration);
+    hasSetDuration = 1;
+  }
   GAPRole_SetParameter(GAPROLE_ADVERT_ENABLED, sizeof(uint8_t), &advertEnabled);
 }
 

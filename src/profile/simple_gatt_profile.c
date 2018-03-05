@@ -63,7 +63,7 @@
 #include "simple_peripheral.h"
 #include "main.h"
 
-#include "icall_api.h"
+#include "icall_ble_api.h"
 
 /*********************************************************************
  * MACROS
@@ -192,7 +192,7 @@ static gattCharCfg_t *simpleProfileChar4Config;
                                         
 // Simple Profile Characteristic 4 User Description
 //static uint8 simpleProfileChar4UserDesp[17] = "Characteristic 4";
-static uint8 simpleProfileChar4UserDesp[17] = "Char 4 - NotifyF";
+static uint8 simpleProfileChar4UserDesp[17] = "Notify User EMG";
 
 //特别注意：因为C语言提倡使用地址输出，如果下列的变量采用直接数值定义，则
 //有利于根据数据地址一次输出多个字节。
@@ -236,6 +236,14 @@ static gattAttribute_t simpleProfileAttrTbl[SERVAPP_NUM_ATTR_SUPPORTED] =
         0, 
         &simpleProfileChar1 
       },
+      
+      // Characteristic 1 configuration
+      //{ 
+        //{ ATT_BT_UUID_SIZE, clientCharCfgUUID },
+        //GATT_PERMIT_READ | GATT_PERMIT_WRITE, 
+        //0, 
+        //(uint8 *)&simpleProfileChar4Config 
+      //},
 
       // Characteristic 1 User Description
       { 
@@ -318,7 +326,8 @@ static gattAttribute_t simpleProfileAttrTbl[SERVAPP_NUM_ATTR_SUPPORTED] =
         { ATT_BT_UUID_SIZE, clientCharCfgUUID },
         GATT_PERMIT_READ | GATT_PERMIT_WRITE, 
         0, 
-        (uint8 *)&simpleProfileChar4Config 
+        //(uint8 *)&debugVari
+        (uint8 *)&simpleProfileChar4Config // <-- 不要尝试修改这个数据，否则导致程序崩溃
       },
       
       // Characteristic 4 User Description

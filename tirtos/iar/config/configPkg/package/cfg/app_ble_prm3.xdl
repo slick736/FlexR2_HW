@@ -3,9 +3,9 @@
  * linkcmd.xdt in the ti.platforms.tiva package and will be overwritten.
  */
 
-"C:\ti\simplelink_cc2640r2_sdk_1_30_00_25\examples\rtos\CC2640R2_LAUNCHXL\blestack\simple_peripheral\tirtos\iar\config\configPkg\package\cfg\app_ble_prm3.orm3"
-"C:\ti\simplelink_cc2640r2_sdk_1_30_00_25\examples\rtos\CC2640R2_LAUNCHXL\blestack\simple_peripheral\tirtos\iar\config\src\sysbios\rom_sysbios.arm3"
-"C:\ti\simplelink_cc2640r2_sdk_1_30_00_25\kernel\tirtos\packages\iar\targets\arm\rts\lib\release\boot.arm3"
+"C:\ti\simplelink_cc2640r2_sdk_1_50_00_58\examples\rtos\CC2640R2_LAUNCHXL\blestack\simple_peripheral_healer\tirtos\iar\config\configPkg\package\cfg\app_ble_prm3.orm3"
+"C:\ti\simplelink_cc2640r2_sdk_1_50_00_58\examples\rtos\CC2640R2_LAUNCHXL\blestack\simple_peripheral_healer\tirtos\src\sysbios\rom_sysbios.arm3"
+"C:\ti\simplelink_cc2640r2_sdk_1_50_00_58\kernel\tirtos\packages\iar\targets\arm\rts\lib\release\boot.arm3"
 
 
 /* Content from xdc.services.global (null): */
@@ -79,11 +79,9 @@
 
 /* Content from ti.sysbios.gates (null): */
 
-/* Content from ti.sysbios.xdcruntime (null): */
-
 /* Content from ti.sysbios.heaps (null): */
 
-/* Content from ti.sysbios.rom.cortexm.cc26xx.r2 (C:/ti/simplelink_cc2640r2_sdk_1_30_00_25/kernel/tirtos/packages/ti/sysbios/rom/cortexm/cc26xx/r2/golden/CC26xx/CC26xx_link_iar.xdt): */
+/* Content from ti.sysbios.rom.cortexm.cc26xx.r2 (C:/ti/simplelink_cc2640r2_sdk_1_50_00_58/kernel/tirtos/packages/ti/sysbios/rom/cortexm/cc26xx/r2/golden/CC26xx/CC26xx_link_iar.xdt): */
 
 --keep xdc_runtime_Error_policy__C
 --keep xdc_runtime_IModule_Interface__BASE__C
@@ -517,6 +515,8 @@
 --define_symbol ti_sysbios_family_arm_m3_TaskSupport_swap__E=0x1001c969
 --define_symbol ti_sysbios_knl_Task_SupportProxy_swap__E=0x1001c969
 
+/* Content from ti.sysbios.xdcruntime (null): */
+
 /* Content from ti.sysbios.utils (null): */
 
 /* Content from configPkg (null): */
@@ -528,7 +528,7 @@
 --define_symbol xdc_runtime_Startup__RESETFXN__C=1
 
 
---config_search C:/ti/simplelink_cc2640r2_sdk_1_30_00_25/kernel/tirtos/packages/ti/sysbios/rom/cortexm/cc26xx/r2/golden/CC26xx/
+--config_search C:/ti/simplelink_cc2640r2_sdk_1_50_00_58/kernel/tirtos/packages/ti/sysbios/rom/cortexm/cc26xx/r2/golden/CC26xx/
 --config_def USE_TIRTOS_ROM=1
 
 --keep __ASM__

@@ -74,10 +74,10 @@
 #include "gapbondmgr.h"
 
 #include "osal_snv.h"
-#include "icall_apimsg.h"
+#include "icall_ble_apimsg.h"
 #include "icall.h"
 
-#include "icall_api.h"
+#include "icall_ble_api.h"
 
 /*********************************************************************
  * MACROS
