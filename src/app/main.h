@@ -61,12 +61,21 @@
 #define CHARGE_OK_VOLTAGE           3876 // <-- 充电完成门限值（4.07V）
 #define BATTERY_LOW_VOLTAGE         3495 // <-- 电量低下门限值（3.67V）
 #define SHUTDOWN_LOW_VOLTAGE        3428 // <-- 禁止开机门限值（3.60V）
+//#define BATTERY_LOW_VOLTAGE         3637 // <-- 电量低下门限值（3.82V）
+//#define SHUTDOWN_LOW_VOLTAGE        3590 // <-- 禁止开机门限值（3.77V）
 #define BATTERY_SAMPLE_INTERVAL     20   // <-- 每过多少个EMG周期自动采样一次电量
 
 //连接相关
 #define CONNECT_RETRY_MAX           2 // <-- 拍击后重试多少个0<->1循环周期
 #define PRECONNECT_RETRY_MAX        5 // <-- 拍击前让LED点亮多少个0<->1循环周期
 #define REJECT_CONNECT_ON_LOWBATT   1 // <-- 是否在电池没电时请求挂断并拒绝再次连接（成品应为1）
+
+#define ENABLE_HEARTBEAT            1 // <-- 启用心跳机制防死机（成品应为1）
+#define ENABLE_AUTO_DISCONNECT_BY_HEARTBEAT 1 // <-- 心跳机制启用时允许硬件自主断开（成品应为1）
+#define HEARTBEAT_MAX_INTERVAL      200 // <-- 经过多少个EMG周期没有从EEE2通道读取数据就认为断连
+                                        // 20 = 1秒，成品应为100
+
+#define VERSION_INFO                1 // <-- 版本信息（本产品为1）
 
 //测试用灯光（成品应为0）
 #define LAMP_TEST_MODE              0

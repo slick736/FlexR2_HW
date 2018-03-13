@@ -66,6 +66,7 @@
 #include "simple_peripheral.h"
 
 #include "icall_ble_api.h"
+#include "st_util.h"
 
 /*********************************************************************
  * MACROS
@@ -88,33 +89,33 @@
  * GLOBAL VARIABLES
  */
 // Simple GATT Profile Service UUID: 0xFFE0
-CONST uint8 xyzEulerServUUID[ATT_BT_UUID_SIZE] =
+CONST uint8 xyzEulerServUUID[TI_UUID_SIZE] =
 { 
-  LO_UINT16(XYZ_EULER_SERV_UUID), HI_UINT16(XYZ_EULER_SERV_UUID)
+  TI_UUID(XYZ_EULER_SERV_UUID)
 };
 
 // Characteristic 1 UUID: 0xFFF1
-CONST uint8 xyzEulerchar1UUID[ATT_BT_UUID_SIZE] =
+CONST uint8 xyzEulerchar1UUID[TI_UUID_SIZE] =
 { 
-  LO_UINT16(XYZ_EULER_CHAR1_UUID), HI_UINT16(XYZ_EULER_CHAR1_UUID)
+  TI_UUID(XYZ_EULER_CHAR1_UUID)
 };
 
 // Characteristic 2 UUID: 0xFFF2
-CONST uint8 xyzEulerchar2UUID[ATT_BT_UUID_SIZE] =
+CONST uint8 xyzEulerchar2UUID[TI_UUID_SIZE] =
 { 
-  LO_UINT16(XYZ_EULER_CHAR2_UUID), HI_UINT16(XYZ_EULER_CHAR2_UUID)
+  TI_UUID(XYZ_EULER_CHAR2_UUID)
 };
 
 // Characteristic 3 UUID: 0xFFF3
-CONST uint8 xyzEulerchar3UUID[ATT_BT_UUID_SIZE] =
+CONST uint8 xyzEulerchar3UUID[TI_UUID_SIZE] =
 { 
-  LO_UINT16(XYZ_EULER_CHAR3_UUID), HI_UINT16(XYZ_EULER_CHAR3_UUID)
+  TI_UUID(XYZ_EULER_CHAR3_UUID)
 };
 
 // Characteristic 4 UUID: 0xFFF4
-CONST uint8 xyzEulerchar4UUID[ATT_BT_UUID_SIZE] =
+CONST uint8 xyzEulerchar4UUID[TI_UUID_SIZE] =
 { 
-  LO_UINT16(XYZ_EULER_CHAR4_UUID), HI_UINT16(XYZ_EULER_CHAR4_UUID)
+  TI_UUID(XYZ_EULER_CHAR4_UUID)
 };
 
 /*********************************************************************
@@ -144,7 +145,7 @@ uint8_t runWithOuterMPU = 0;
  */
 
 // Simple Profile Service attribute
-static CONST gattAttrType_t xyzEulerService = { ATT_BT_UUID_SIZE, xyzEulerServUUID };
+static CONST gattAttrType_t xyzEulerService = { TI_UUID_SIZE, xyzEulerServUUID };
 
 
 // Simple Profile Characteristic 1 Properties
@@ -223,7 +224,7 @@ static gattAttribute_t xyzEulerAttrTbl[SERVAPP_NUM_ATTR_SUPPORTED] =
 
       // Characteristic Value 1
       { 
-        { ATT_BT_UUID_SIZE, xyzEulerchar1UUID },
+        { TI_UUID_SIZE, xyzEulerchar1UUID },
         GATT_PERMIT_READ | GATT_PERMIT_WRITE, 
         0, 
         &xyzEulerChar1 
@@ -248,7 +249,7 @@ static gattAttribute_t xyzEulerAttrTbl[SERVAPP_NUM_ATTR_SUPPORTED] =
 
       // Characteristic Value 2
       { 
-        { ATT_BT_UUID_SIZE, xyzEulerchar2UUID },
+        { TI_UUID_SIZE, xyzEulerchar2UUID },
         GATT_PERMIT_READ, 
         0, 
         xyzEulerChar2 
@@ -273,7 +274,7 @@ static gattAttribute_t xyzEulerAttrTbl[SERVAPP_NUM_ATTR_SUPPORTED] =
 
       // Characteristic Value 3
       { 
-        { ATT_BT_UUID_SIZE, xyzEulerchar3UUID },
+        { TI_UUID_SIZE, xyzEulerchar3UUID },
         GATT_PERMIT_WRITE, 
         0, 
         &xyzEulerChar3 
@@ -299,7 +300,7 @@ static gattAttribute_t xyzEulerAttrTbl[SERVAPP_NUM_ATTR_SUPPORTED] =
 
       // Characteristic Value 4
       { 
-        { ATT_BT_UUID_SIZE, xyzEulerchar4UUID },
+        { TI_UUID_SIZE, xyzEulerchar4UUID },
         0, 
         0, 
         &xyzEulerChar4 
@@ -572,10 +573,18 @@ static bStatus_t xyzEuler_ReadAttrCB(uint16_t connHandle,
   {
     return ( ATT_ERR_ATTR_NOT_LONG );
   }
-  if ( pAttr->type.len == ATT_BT_UUID_SIZE )
+  uint8_t uuidLen = pAttr->type.len;
+  if (uuidLen == ATT_BT_UUID_SIZE || uuidLen == ATT_UUID_SIZE)
   {
-    // 16-bit UUID
-    uint16 uuid = BUILD_UINT16( pAttr->type.uuid[0], pAttr->type.uuid[1]);
+    // 16-bit UUID or 128-bit UUID
+    uint16 uuid = 0;
+    if(uuidLen == ATT_BT_UUID_SIZE){
+      // 16-bit UUID
+      uuid = BUILD_UINT16( pAttr->type.uuid[0], pAttr->type.uuid[1]);
+    }else{
+      // 128-bit UUID
+      uuid = BUILD_UINT16( pAttr->type.uuid[12], pAttr->type.uuid[13]);
+    }
     char mplResult[23] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     uint8_t i;
     switch ( uuid )
@@ -634,7 +643,7 @@ static bStatus_t xyzEuler_ReadAttrCB(uint16_t connHandle,
   }
   else
   {
-    // 128-bit UUID
+    // neither 16-bit UUID nor 128-bit UUID
     *pLen = 0;
     status = ATT_ERR_INVALID_HANDLE;
   }
@@ -664,10 +673,18 @@ static bStatus_t xyzEuler_WriteAttrCB(uint16_t connHandle,
   bStatus_t status = SUCCESS;
   uint8 notifyApp = 0xFF;
   
-  if ( pAttr->type.len == ATT_BT_UUID_SIZE )
+  uint8_t uuidLen = pAttr->type.len;
+  if (uuidLen == ATT_BT_UUID_SIZE || uuidLen == ATT_UUID_SIZE)
   {
-    // 16-bit UUID
-    uint16 uuid = BUILD_UINT16( pAttr->type.uuid[0], pAttr->type.uuid[1]);
+    // 16-bit UUID or 128-bit UUID
+    uint16 uuid = 0;
+    if(uuidLen == ATT_BT_UUID_SIZE){
+      // 16-bit UUID
+      uuid = BUILD_UINT16( pAttr->type.uuid[0], pAttr->type.uuid[1]);
+    }else{
+      // 128-bit UUID
+      uuid = BUILD_UINT16( pAttr->type.uuid[12], pAttr->type.uuid[13]);
+    }
     switch ( uuid )
     {
       case XYZ_EULER_CHAR1_UUID:
@@ -748,7 +765,7 @@ static bStatus_t xyzEuler_WriteAttrCB(uint16_t connHandle,
   }
   else
   {
-    // 128-bit UUID
+    // neither 16-bit UUID nor 128-bit UUID
     status = ATT_ERR_INVALID_HANDLE;
   }
 

@@ -67,6 +67,7 @@
 #include "main.h"
 
 #include "icall_ble_api.h"
+#include "st_util.h"
 
 /*********************************************************************
  * MACROS
@@ -89,33 +90,33 @@
  * GLOBAL VARIABLES
  */
 // Simple GATT Profile Service UUID: 0xFFE0
-CONST uint8 customProfileServUUID[ATT_BT_UUID_SIZE] =
+CONST uint8 customProfileServUUID[TI_UUID_SIZE] =
 { 
-  LO_UINT16(CUSTOMPROFILE_SERV_UUID), HI_UINT16(CUSTOMPROFILE_SERV_UUID)
+  TI_UUID(CUSTOMPROFILE_SERV_UUID)
 };
 
 // Characteristic 1 UUID: 0xFFF1
-CONST uint8 customProfilechar1UUID[ATT_BT_UUID_SIZE] =
+CONST uint8 customProfilechar1UUID[TI_UUID_SIZE] =
 { 
-  LO_UINT16(CUSTOMPROFILE_CHAR1_UUID), HI_UINT16(CUSTOMPROFILE_CHAR1_UUID)
+  TI_UUID(CUSTOMPROFILE_CHAR1_UUID)
 };
 
 // Characteristic 2 UUID: 0xFFF2
-CONST uint8 customProfilechar2UUID[ATT_BT_UUID_SIZE] =
+CONST uint8 customProfilechar2UUID[TI_UUID_SIZE] =
 { 
-  LO_UINT16(CUSTOMPROFILE_CHAR2_UUID), HI_UINT16(CUSTOMPROFILE_CHAR2_UUID)
+  TI_UUID(CUSTOMPROFILE_CHAR2_UUID)
 };
 
 // Characteristic 3 UUID: 0xFFF3
-CONST uint8 customProfilechar3UUID[ATT_BT_UUID_SIZE] =
+CONST uint8 customProfilechar3UUID[TI_UUID_SIZE] =
 { 
-  LO_UINT16(CUSTOMPROFILE_CHAR3_UUID), HI_UINT16(CUSTOMPROFILE_CHAR3_UUID)
+  TI_UUID(CUSTOMPROFILE_CHAR3_UUID)
 };
 
 // Characteristic 4 UUID: 0xFFF4
-CONST uint8 customProfilechar4UUID[ATT_BT_UUID_SIZE] =
+CONST uint8 customProfilechar4UUID[TI_UUID_SIZE] =
 { 
-  LO_UINT16(CUSTOMPROFILE_CHAR4_UUID), HI_UINT16(CUSTOMPROFILE_CHAR4_UUID)
+  TI_UUID(CUSTOMPROFILE_CHAR4_UUID)
 };
 
 /*********************************************************************
@@ -139,7 +140,7 @@ static customProfileCBs_t *customProfile_AppCBs = NULL;
  */
 
 // Simple Profile Service attribute
-static CONST gattAttrType_t customProfileService = { ATT_BT_UUID_SIZE, customProfileServUUID };
+static CONST gattAttrType_t customProfileService = { TI_UUID_SIZE, customProfileServUUID };
 
 
 // Simple Profile Characteristic 1 Properties
@@ -150,7 +151,7 @@ static uint8 customProfileChar1[CUSTOMPROFILE_CHAR1_LEN] = { 4, 9 };
 
 // Simple Profile Characteristic 1 User Description
 //static uint8 simpleProfileChar1UserDesp[17] = "Characteristic 1";
-static uint8 customProfileChar1UserDesp[17] = "Char 1 - R/W Fun";
+static uint8 customProfileChar1UserDesp[17] = "WriteUsers Config";
 
 
 // Simple Profile Characteristic 2 Properties
@@ -161,7 +162,7 @@ static uint8 customProfileChar2[CUSTOMPROFILE_CHAR2_LEN] = { 0, 0, 0, 0, 0, 0, 0
 
 // Simple Profile Characteristic 2 User Description
 //static uint8 simpleProfileChar2UserDesp[17] = "Characteristic 2";
-static uint8 customProfileChar2UserDesp[17] = "Char 2 - Read On";
+static uint8 customProfileChar2UserDesp[17] = "Read Users Config";
 
 
 // Simple Profile Characteristic 3 Properties
@@ -192,7 +193,7 @@ static gattCharCfg_t *customProfileChar4Config;
                                         
 // Simple Profile Characteristic 4 User Description
 //static uint8 simpleProfileChar4UserDesp[17] = "Characteristic 4";
-static uint8 customProfileChar4UserDesp[17] = "Notify Config";
+static uint8 customProfileChar4UserDesp[17] = "FlexRII v1.0.0.2";
 
 //=================================================================================================
 
@@ -221,7 +222,7 @@ static gattAttribute_t customProfileAttrTbl[SERVAPP_NUM_ATTR_SUPPORTED] =
 
       // Characteristic Value 1
       { 
-        { ATT_BT_UUID_SIZE, customProfilechar1UUID },
+        { TI_UUID_SIZE, customProfilechar1UUID },
         GATT_PERMIT_READ | GATT_PERMIT_WRITE, 
         0, 
         customProfileChar1 
@@ -246,7 +247,7 @@ static gattAttribute_t customProfileAttrTbl[SERVAPP_NUM_ATTR_SUPPORTED] =
 
       // Characteristic Value 2
       { 
-        { ATT_BT_UUID_SIZE, customProfilechar2UUID },
+        { TI_UUID_SIZE, customProfilechar2UUID },
         GATT_PERMIT_READ, 
         0, 
         customProfileChar2 
@@ -271,7 +272,7 @@ static gattAttribute_t customProfileAttrTbl[SERVAPP_NUM_ATTR_SUPPORTED] =
 
       // Characteristic Value 3
       { 
-        { ATT_BT_UUID_SIZE, customProfilechar3UUID },
+        { TI_UUID_SIZE, customProfilechar3UUID },
         GATT_PERMIT_WRITE, 
         0, 
         &customProfileChar3 
@@ -297,7 +298,7 @@ static gattAttribute_t customProfileAttrTbl[SERVAPP_NUM_ATTR_SUPPORTED] =
 
       // Characteristic Value 4
       { 
-        { ATT_BT_UUID_SIZE, customProfilechar4UUID },
+        { TI_UUID_SIZE, customProfilechar4UUID },
         0, 
         0, 
         &customProfileChar4 
@@ -572,10 +573,18 @@ static bStatus_t customProfile_ReadAttrCB(uint16_t connHandle,
   {
     return ( ATT_ERR_ATTR_NOT_LONG );
   }
-  if ( pAttr->type.len == ATT_BT_UUID_SIZE )
+  uint8_t uuidLen = pAttr->type.len;
+  if (uuidLen == ATT_BT_UUID_SIZE || uuidLen == ATT_UUID_SIZE)
   {
-    // 16-bit UUID
-    uint16 uuid = BUILD_UINT16( pAttr->type.uuid[0], pAttr->type.uuid[1]);
+    // 16-bit UUID or 128-bit UUID
+    uint16 uuid = 0;
+    if(uuidLen == ATT_BT_UUID_SIZE){
+      // 16-bit UUID
+      uuid = BUILD_UINT16( pAttr->type.uuid[0], pAttr->type.uuid[1]);
+    }else{
+      // 128-bit UUID
+      uuid = BUILD_UINT16( pAttr->type.uuid[12], pAttr->type.uuid[13]);
+    }
     //uint8_t i2cResult[2] = { 0, 0 };
     //uint8_t slaveAddress;
     uint16_t adcTempResult;
@@ -633,30 +642,35 @@ static bStatus_t customProfile_ReadAttrCB(uint16_t connHandle,
         customProfileChar2[5] = i2cResult[0];
         */
         
-        //电源电压
-        //adcTempResult = getBatteryData();
-        //customProfileChar2[6] = (adcTempResult >> 8);
-        //customProfileChar2[7] = (adcTempResult % 256);
-        
-        //最终输出
-        //*pLen = CUSTOMPROFILE_CHAR2_LEN;
-        //VOID memcpy( pValue, pAttr->pValue, CUSTOMPROFILE_CHAR2_LEN );
-        //break;
-        
-        ///*
+        //前2字节：电源电压
         adcTempResult = getBatteryData();
         customProfileChar2[0] = (adcTempResult >> 8);
         customProfileChar2[1] = (adcTempResult % 256);
-        customProfileChar2[2] = 0;
-        customProfileChar2[3] = 0;
-        customProfileChar2[4] = 0;
-        customProfileChar2[5] = 0;
+        
+        //第3字节：连接状态
+        // 0 - 正常工作中
+        // 1 - 还能工作但电量不足了
+        // 8 - 等待拍击以便进入正常工作状态
+        // 9 - 因电量不足或其他故障而拒绝连接
+        // 15 - 电量耗尽或其他故障而请求断开
+        customProfileChar2[2] = (workStatus << 4);
+        customProfileChar2[2] += VERSION_INFO;
+        
+        //第4字节：暂时显示为心跳机制计数
+        customProfileChar2[3] = heartBeatCount;
+        
+        //后2字节：暂时未用
+        //customProfileChar2[4] = 0;
+        //customProfileChar2[5] = 0;
         //customProfileChar2[4] = (currentOutputVal >> 8);
         //customProfileChar2[5] = (currentOutputVal % 256);
         //*/
         
-        *pLen = 6;
-        VOID memcpy( pValue, pAttr->pValue, 6 );
+        //执行过读取动作后，心跳机制计数清零
+        heartBeatCount = 0;
+        
+        *pLen = 4; // <-- 原6
+        VOID memcpy(pValue, pAttr->pValue, 4);
         break;
         
       default:
@@ -668,7 +682,7 @@ static bStatus_t customProfile_ReadAttrCB(uint16_t connHandle,
   }
   else
   {
-    // 128-bit UUID
+    // neither 16-bit UUID nor 128-bit UUID
     *pLen = 0;
     status = ATT_ERR_INVALID_HANDLE;
   }
@@ -699,10 +713,18 @@ static bStatus_t customProfile_WriteAttrCB(uint16_t connHandle,
   uint8 notifyApp = 0xFF;
   uint16_t tempSystemOpt;
   
-  if ( pAttr->type.len == ATT_BT_UUID_SIZE )
+  uint8_t uuidLen = pAttr->type.len;
+  if (uuidLen == ATT_BT_UUID_SIZE || uuidLen == ATT_UUID_SIZE)
   {
-    // 16-bit UUID
-    uint16 uuid = BUILD_UINT16( pAttr->type.uuid[0], pAttr->type.uuid[1]);
+    // 16-bit UUID or 128-bit UUID
+    uint16 uuid = 0;
+    if(uuidLen == ATT_BT_UUID_SIZE){
+      // 16-bit UUID
+      uuid = BUILD_UINT16( pAttr->type.uuid[0], pAttr->type.uuid[1]);
+    }else{
+      // 128-bit UUID
+      uuid = BUILD_UINT16( pAttr->type.uuid[12], pAttr->type.uuid[13]);
+    }
     switch ( uuid )
     {
       case CUSTOMPROFILE_CHAR1_UUID:
@@ -780,7 +802,7 @@ static bStatus_t customProfile_WriteAttrCB(uint16_t connHandle,
   }
   else
   {
-    // 128-bit UUID
+    // neither 16-bit UUID nor 128-bit UUID
     status = ATT_ERR_INVALID_HANDLE;
   }
 

@@ -64,6 +64,7 @@
 #include "main.h"
 
 #include "icall_ble_api.h"
+#include "st_util.h"
 
 /*********************************************************************
  * MACROS
@@ -86,39 +87,39 @@
  * GLOBAL VARIABLES
  */
 // Simple GATT Profile Service UUID: 0xFFF0
-CONST uint8 simpleProfileServUUID[ATT_BT_UUID_SIZE] =
+CONST uint8 simpleProfileServUUID[TI_UUID_SIZE] =
 { 
-  LO_UINT16(SIMPLEPROFILE_SERV_UUID), HI_UINT16(SIMPLEPROFILE_SERV_UUID)
+  TI_UUID(SIMPLEPROFILE_SERV_UUID)
 };
 
 // Characteristic 1 UUID: 0xFFF1
-CONST uint8 simpleProfilechar1UUID[ATT_BT_UUID_SIZE] =
+CONST uint8 simpleProfilechar1UUID[TI_UUID_SIZE] =
 { 
-  LO_UINT16(SIMPLEPROFILE_CHAR1_UUID), HI_UINT16(SIMPLEPROFILE_CHAR1_UUID)
+  TI_UUID(SIMPLEPROFILE_CHAR1_UUID)
 };
 
 // Characteristic 2 UUID: 0xFFF2
-CONST uint8 simpleProfilechar2UUID[ATT_BT_UUID_SIZE] =
+CONST uint8 simpleProfilechar2UUID[TI_UUID_SIZE] =
 { 
-  LO_UINT16(SIMPLEPROFILE_CHAR2_UUID), HI_UINT16(SIMPLEPROFILE_CHAR2_UUID)
+  TI_UUID(SIMPLEPROFILE_CHAR2_UUID)
 };
 
 // Characteristic 3 UUID: 0xFFF3
-CONST uint8 simpleProfilechar3UUID[ATT_BT_UUID_SIZE] =
+CONST uint8 simpleProfilechar3UUID[TI_UUID_SIZE] =
 { 
-  LO_UINT16(SIMPLEPROFILE_CHAR3_UUID), HI_UINT16(SIMPLEPROFILE_CHAR3_UUID)
+  TI_UUID(SIMPLEPROFILE_CHAR3_UUID)
 };
 
 // Characteristic 4 UUID: 0xFFF4
-CONST uint8 simpleProfilechar4UUID[ATT_BT_UUID_SIZE] =
+CONST uint8 simpleProfilechar4UUID[TI_UUID_SIZE] =
 { 
-  LO_UINT16(SIMPLEPROFILE_CHAR4_UUID), HI_UINT16(SIMPLEPROFILE_CHAR4_UUID)
+  TI_UUID(SIMPLEPROFILE_CHAR4_UUID)
 };
 
 // Characteristic 5 UUID: 0xFFF5
-CONST uint8 simpleProfilechar5UUID[ATT_BT_UUID_SIZE] =
+CONST uint8 simpleProfilechar5UUID[TI_UUID_SIZE] =
 { 
-  LO_UINT16(SIMPLEPROFILE_CHAR5_UUID), HI_UINT16(SIMPLEPROFILE_CHAR5_UUID)
+  TI_UUID(SIMPLEPROFILE_CHAR5_UUID)
 };
 
 /*********************************************************************
@@ -142,7 +143,7 @@ static simpleProfileCBs_t *simpleProfile_AppCBs = NULL;
  */
 
 // Simple Profile Service attribute
-static CONST gattAttrType_t simpleProfileService = { ATT_BT_UUID_SIZE, simpleProfileServUUID };
+static CONST gattAttrType_t simpleProfileService = { TI_UUID_SIZE, simpleProfileServUUID };
 
 
 // Simple Profile Characteristic 1 Properties
@@ -231,20 +232,12 @@ static gattAttribute_t simpleProfileAttrTbl[SERVAPP_NUM_ATTR_SUPPORTED] =
 
       // Characteristic Value 1
       { 
-        { ATT_BT_UUID_SIZE, simpleProfilechar1UUID },
+        { TI_UUID_SIZE, simpleProfilechar1UUID },
         GATT_PERMIT_READ | GATT_PERMIT_WRITE, 
         0, 
         &simpleProfileChar1 
       },
       
-      // Characteristic 1 configuration
-      //{ 
-        //{ ATT_BT_UUID_SIZE, clientCharCfgUUID },
-        //GATT_PERMIT_READ | GATT_PERMIT_WRITE, 
-        //0, 
-        //(uint8 *)&simpleProfileChar4Config 
-      //},
-
       // Characteristic 1 User Description
       { 
         { ATT_BT_UUID_SIZE, charUserDescUUID },
@@ -264,7 +257,7 @@ static gattAttribute_t simpleProfileAttrTbl[SERVAPP_NUM_ATTR_SUPPORTED] =
 
       // Characteristic Value 2
       { 
-        { ATT_BT_UUID_SIZE, simpleProfilechar2UUID },
+        { TI_UUID_SIZE, simpleProfilechar2UUID },
         GATT_PERMIT_READ, 
         0, 
         &simpleProfileChar2 
@@ -289,7 +282,7 @@ static gattAttribute_t simpleProfileAttrTbl[SERVAPP_NUM_ATTR_SUPPORTED] =
 
       // Characteristic Value 3
       { 
-        { ATT_BT_UUID_SIZE, simpleProfilechar3UUID },
+        { TI_UUID_SIZE, simpleProfilechar3UUID },
         GATT_PERMIT_WRITE, 
         0, 
         &simpleProfileChar3 
@@ -315,7 +308,7 @@ static gattAttribute_t simpleProfileAttrTbl[SERVAPP_NUM_ATTR_SUPPORTED] =
 
       // Characteristic Value 4
       { 
-        { ATT_BT_UUID_SIZE, simpleProfilechar4UUID },
+        { TI_UUID_SIZE, simpleProfilechar4UUID },
         0, 
         0, 
         &simpleProfileChar4 
@@ -588,10 +581,19 @@ static bStatus_t simpleProfile_ReadAttrCB(uint16_t connHandle,
   {
     return ( ATT_ERR_ATTR_NOT_LONG );
   }
-  if ( pAttr->type.len == ATT_BT_UUID_SIZE )
+  uint8_t uuidLen = pAttr->type.len;
+  if (uuidLen == ATT_BT_UUID_SIZE || uuidLen == ATT_UUID_SIZE)
   {
-    // 16-bit UUID
-    uint16 uuid = BUILD_UINT16( pAttr->type.uuid[0], pAttr->type.uuid[1]);
+    // 16-bit UUID or 128-bit UUID
+    uint16 uuid = 0;
+    if(uuidLen == ATT_BT_UUID_SIZE){
+      // 16-bit UUID
+      uuid = BUILD_UINT16( pAttr->type.uuid[0], pAttr->type.uuid[1]);
+    }else{
+      // 128-bit UUID
+      uuid = BUILD_UINT16( pAttr->type.uuid[12], pAttr->type.uuid[13]);
+    }
+    
     switch ( uuid )
     {
       // No need for "GATT_SERVICE_UUID" or "GATT_CLIENT_CHAR_CFG_UUID" cases;
@@ -623,7 +625,7 @@ static bStatus_t simpleProfile_ReadAttrCB(uint16_t connHandle,
   }
   else
   {
-    // 128-bit UUID
+    // neither 16-bit UUID nor 128-bit UUID
     *pLen = 0;
     status = ATT_ERR_INVALID_HANDLE;
   }
@@ -653,10 +655,18 @@ static bStatus_t simpleProfile_WriteAttrCB(uint16_t connHandle,
   bStatus_t status = SUCCESS;
   uint8 notifyApp = 0xFF;
   
-  if ( pAttr->type.len == ATT_BT_UUID_SIZE )
+  uint8_t uuidLen = pAttr->type.len;
+  if (uuidLen == ATT_BT_UUID_SIZE || uuidLen == ATT_UUID_SIZE)
   {
-    // 16-bit UUID
-    uint16 uuid = BUILD_UINT16( pAttr->type.uuid[0], pAttr->type.uuid[1]);
+    // 16-bit UUID or 128-bit UUID
+    uint16 uuid = 0;
+    if(uuidLen == ATT_BT_UUID_SIZE){
+      // 16-bit UUID
+      uuid = BUILD_UINT16( pAttr->type.uuid[0], pAttr->type.uuid[1]);
+    }else{
+      // 128-bit UUID
+      uuid = BUILD_UINT16( pAttr->type.uuid[12], pAttr->type.uuid[13]);
+    }
     switch ( uuid )
     {
       case SIMPLEPROFILE_CHAR1_UUID:
@@ -732,7 +742,7 @@ static bStatus_t simpleProfile_WriteAttrCB(uint16_t connHandle,
   }
   else
   {
-    // 128-bit UUID
+    // neither 16-bit UUID nor 128-bit UUID
     status = ATT_ERR_INVALID_HANDLE;
   }
 

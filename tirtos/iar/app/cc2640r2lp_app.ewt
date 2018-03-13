@@ -2355,6 +2355,12 @@
             <name>$PROJ_DIR$\..\..\..\src\app\simple_peripheral.h</name>
         </file>
         <file>
+            <name>$PROJ_DIR$\..\..\..\src\app\st_util.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\src\app\st_util.h</name>
+        </file>
+        <file>
             <name>$PROJ_DIR$\..\..\..\..\..\..\..\..\source\ti\blestack\common\cc26xx\util.c</name>
         </file>
         <file>

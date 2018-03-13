@@ -238,6 +238,7 @@
                     <state>USE_ICALL</state>
                     <state>xdc_runtime_Assert_DISABLE_ALL</state>
                     <state>xdc_runtime_Log_DISABLE_ALL</state>
+                    <state>GATT_TI_UUID_128_BIT</state>
                 </option>
                 <option>
                     <name>CCPreprocFile</name>
@@ -2201,6 +2202,12 @@
         </file>
         <file>
             <name>$PROJ_DIR$\..\..\..\src\app\simple_peripheral.h</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\src\app\st_util.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\src\app\st_util.h</name>
         </file>
         <file>
             <name>$PROJ_DIR$\..\..\..\..\..\..\..\..\source\ti\blestack\common\cc26xx\util.c</name>

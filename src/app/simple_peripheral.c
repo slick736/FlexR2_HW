@@ -76,6 +76,7 @@
 #include "peripheral.h"
 #include "main.h"
 #include "delay.h"
+#include "st_util.h"
 
 #include <ti/sysbios/knl/Swi.h>
 
@@ -93,6 +94,9 @@ extern void changeTxLevel(uint8_t neoTxLevel);
 
 //是否允许不经过陀螺仪同意而自动连接
 extern uint8_t enableAutoConnect = 0;
+
+//心跳机制计数
+extern uint8_t heartBeatCount = 0;
 
 //是否允许该设备连接蓝牙
 uint8_t enableConnectBLE;
@@ -361,25 +365,33 @@ static uint8_t advertData[] =
   // 提醒主机，都有什么Service可以连上
   
 #if !defined(FEATURE_OAD) || defined(FEATURE_OAD_ONCHIP)
-  0x07,   // length of this data
+  #ifdef GATT_TI_UUID_128_BIT
+    0x11,   // length of this data
+    GAP_ADTYPE_128BIT_MORE,      // some of the UUID's, but not all
+  #else
+    0x07,   // length of this data
+    GAP_ADTYPE_16BIT_MORE,      // some of the UUID's, but not all
+  #endif
 #else //OAD for external flash
   0x09,   // length of this data
+  GAP_ADTYPE_16BIT_MORE,      // some of the UUID's, but not all
 #endif //FEATURE_OAD
   
-  GAP_ADTYPE_16BIT_MORE,      // some of the UUID's, but not all
-#ifdef FEATURE_OAD
+  
+#ifdef FEATURE_OAD // <-- 本嵌入式程序禁用OAD和OAD_ONCHIP!
   LO_UINT16(OAD_SERVICE_UUID),
   HI_UINT16(OAD_SERVICE_UUID),
 #endif //FEATURE_OAD
 
 //给哪个UUID打广告？
 #ifndef FEATURE_OAD_ONCHIP
-  LO_UINT16(SIMPLEPROFILE_SERV_UUID),
-  HI_UINT16(SIMPLEPROFILE_SERV_UUID),
-  LO_UINT16(CUSTOMPROFILE_SERV_UUID),
-  HI_UINT16(CUSTOMPROFILE_SERV_UUID),
-  LO_UINT16(XYZ_EULER_SERV_UUID),
-  HI_UINT16(XYZ_EULER_SERV_UUID)
+  #ifdef GATT_TI_UUID_128_BIT
+    TI_UUID(CUSTOMPROFILE_SERV_UUID),
+  #else
+    TI_UUID(SIMPLEPROFILE_SERV_UUID),
+    TI_UUID(CUSTOMPROFILE_SERV_UUID),
+    TI_UUID(XYZ_EULER_SERV_UUID)
+  #endif
 #endif //FEATURE_OAD_ONCHIP
 };
 
@@ -1307,6 +1319,8 @@ static void SimpleBLEPeripheral_processStateChangeEvt(gaprole_States_t newState)
         //打开时钟，等待计时结束，事件生成后执行perodicTask
         //注：只有蓝牙已连接状况下才执行
         Util_startClock(&periodicClock);
+        //建立连接时，将心跳机制计数清零
+        heartBeatCount = 0;
         //接受蓝牙请求，蓝牙连接，进入2级工作状态
         //注意3级工作状态是无法从这里直接进入的，必须先执行EEE3的系统设定
         if(enableAutoConnect > 0 || WORKLEVEL2_WITHOUT_MPU > 0){
@@ -1373,7 +1387,8 @@ static void SimpleBLEPeripheral_processStateChangeEvt(gaprole_States_t newState)
       Util_stopClock(&periodicClock);
       //这里，只要一停掉使用蓝牙的程序，或者人工挂断连接，蓝牙就断开
       SimpleBLEPeripheral_freeAttRsp(bleNotConnected);
-      
+      //心跳机制清零
+      heartBeatCount = 0;
       //系统判断：是连接被人工挂断，还是Advertise到时间了？
       if(bleStopReason > 0){
         //人为原因挂断，或者蓝牙信号不佳而断连：
@@ -1624,6 +1639,19 @@ uint8_t bleCycleCount = 127;
 
 extern uint8_t workStatus = 0; // <-- 自身工作状态
 
+//硬件自己主动断开的方法
+void forceStopBLE(void){
+  //无论在什么情况下，都会强制挂断蓝牙的方法
+  //lpaLampLoop = 0;
+  terminateConnectionWithDisabled = 1;
+  enableConnectBLE = 0;
+  bleStopReason = 1;
+  Util_stopClock(&periodicClock);
+  SimpleBLEPeripheral_freeAttRsp(bleNotConnected);
+  GAPRole_TerminateConnection();
+  meDisableBLEConnect();
+}
+
 //最关键的部分：蓝牙在连通时循环执行的部分
 static void SimpleBLEPeripheral_performPeriodicTask(void)
 {
@@ -1685,6 +1713,15 @@ static void SimpleBLEPeripheral_performPeriodicTask(void)
       //将工作状态合并到adcTempResult的最高4位
       workResult = workStatus;
       adcTempResult += (workResult << 12);
+      //心跳机制计数+1
+      heartBeatCount += ENABLE_HEARTBEAT;
+      if(heartBeatCount >= HEARTBEAT_MAX_INTERVAL){
+        //若心跳机制计数达到上限则需采取措施
+        heartBeatCount = HEARTBEAT_MAX_INTERVAL;
+        if(ENABLE_AUTO_DISCONNECT_BY_HEARTBEAT > 0){
+          forceStopBLE();
+        }
+      }
       SimpleProfile_SetParameter(SIMPLEPROFILE_CHAR4, sizeof(uint16_t), &adcTempResult);
       adcServiceGo += 1;
       if(adcServiceGo >= 4){
@@ -1761,6 +1798,15 @@ static void SimpleBLEPeripheral_performPeriodicTask(void)
     //将工作状态合并到adcTempResult的最高4位
     workResult = workStatus;
     adcTempResult += (workResult << 12);
+    //心跳机制计数+1
+    heartBeatCount += ENABLE_HEARTBEAT;
+    if(heartBeatCount >= HEARTBEAT_MAX_INTERVAL){
+      //若心跳机制计数达到上限则需采取措施
+      heartBeatCount = HEARTBEAT_MAX_INTERVAL;
+      if(ENABLE_AUTO_DISCONNECT_BY_HEARTBEAT > 0){
+        forceStopBLE();
+      }
+    }
     //数据传输
     SimpleProfile_SetParameter(SIMPLEPROFILE_CHAR4, sizeof(uint16_t), &adcTempResult);
   }else{
