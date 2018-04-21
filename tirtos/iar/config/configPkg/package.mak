@@ -74,13 +74,13 @@ C:/ti/simplelink_cc2640r2_sdk_1_50_00_58/kernel/tirtos/packages/iar/targets/arm/
 package.mak: C:/ti/simplelink_cc2640r2_sdk_1_50_00_58/kernel/tirtos/packages/iar/targets/arm/ITarget.xs
 C:/ti/simplelink_cc2640r2_sdk_1_50_00_58/kernel/tirtos/packages/iar/targets/arm/package.xs:
 package.mak: C:/ti/simplelink_cc2640r2_sdk_1_50_00_58/kernel/tirtos/packages/iar/targets/arm/package.xs
+package.mak: package.bld
+C:/ti/xdctools_3_50_03_33_core/packages/xdc/tools/configuro/template/compiler.opt.xdt:
+package.mak: C:/ti/xdctools_3_50_03_33_core/packages/xdc/tools/configuro/template/compiler.opt.xdt
 C:/ti/xdctools_3_50_03_33_core/packages/xdc/services/io/File.xs:
 package.mak: C:/ti/xdctools_3_50_03_33_core/packages/xdc/services/io/File.xs
 C:/ti/xdctools_3_50_03_33_core/packages/xdc/services/io/package.xs:
 package.mak: C:/ti/xdctools_3_50_03_33_core/packages/xdc/services/io/package.xs
-package.mak: package.bld
-C:/ti/xdctools_3_50_03_33_core/packages/xdc/tools/configuro/template/compiler.opt.xdt:
-package.mak: C:/ti/xdctools_3_50_03_33_core/packages/xdc/tools/configuro/template/compiler.opt.xdt
 C:/ti/xdctools_3_50_03_33_core/packages/xdc/tools/configuro/template/compiler.defs.xdt:
 package.mak: C:/ti/xdctools_3_50_03_33_core/packages/xdc/tools/configuro/template/compiler.defs.xdt
 C:/ti/xdctools_3_50_03_33_core/packages/xdc/tools/configuro/template/custom.mak.exe.xdt:
@@ -89,7 +89,7 @@ C:/ti/xdctools_3_50_03_33_core/packages/xdc/tools/configuro/template/package.xs.
 package.mak: C:/ti/xdctools_3_50_03_33_core/packages/xdc/tools/configuro/template/package.xs.xdt
 endif
 
-iar.targets.arm.M3.rootDir ?= C:/PROGRA~2/IARSYS~1/EMBEDD~2.0/arm
+iar.targets.arm.M3.rootDir ?= D:/IAR811/IAR811/arm
 iar.targets.arm.packageBase ?= C:/ti/simplelink_cc2640r2_sdk_1_50_00_58/kernel/tirtos/packages/iar/targets/arm/
 .PRECIOUS: $(XDCCFGDIR)/%.orm3
 .PHONY: all,rm3 .dlls,rm3 .executables,rm3 test,rm3

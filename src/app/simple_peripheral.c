@@ -87,22 +87,30 @@ Swi_Handle swi;
 extern uint8_t enableReadMPL;
 extern uint8_t enableReadADC;
 uint8_t BLE_PAUSED;
-void meDisableBLEConnect(void);
+static void meDisableBLEConnect(void);
 extern uint8_t lpaLampLoop = 0;
+static uint8_t advertEnabled = 0; // <-- 允许播放广告
 extern void changeRxLevel(uint8_t neoRxLevel);
 extern void changeTxLevel(uint8_t neoTxLevel);
 
 //是否允许不经过陀螺仪同意而自动连接
-extern uint8_t enableAutoConnect = 0;
+static uint8_t enableAutoConnect = 0;
 
 //心跳机制计数
-extern uint8_t heartBeatCount = 0;
+static uint8_t heartBeatCount = 0;
+//清零心跳机制
+extern void clearHeartBeatCount(void){
+  heartBeatCount = 0;
+}
+extern uint8_t getHeartBeatCount(){
+  return heartBeatCount;
+}
 
 //是否允许该设备连接蓝牙
 uint8_t enableConnectBLE;
-uint8_t terminateConnectionWithDisabled; // <-- 终结连接的时候是否将enableConnectBLE也置0
+static uint8_t terminateConnectionWithDisabled; // <-- 终结连接的时候是否将enableConnectBLE也置0
 //变量：是否为外部因素挂断
-uint8_t disconnectByInterrupt = 0;
+static uint8_t disconnectByInterrupt = 0;
 
 #if defined(FEATURE_OAD) || defined(IMAGE_INVALIDATE)
 #include "oad_target.h"
@@ -324,16 +332,10 @@ Char sbpTaskStack[SBP_TASK_STACK_SIZE];
 static uint8_t scanRspData[] =
 {
   // complete name
-  0x09,   // length of this data
+  //0x09, GAP_ADTYPE_LOCAL_NAME_COMPLETE, 'F','L','E','X','R','-','I','I',
+  0x14,
   GAP_ADTYPE_LOCAL_NAME_COMPLETE,
-  'F',
-  'l',
-  'e',
-  'x',
-  'R',
-  ' ',
-  'I',
-  'I',
+  HEALEREMG_SERIAL_NUMBER,
 
   // connection interval range
   0x05,   // length of this data
@@ -779,7 +781,7 @@ static void SimpleBLEPeripheral_init(void)
 }
 
 //实时修改功率和增益
-uint8_t rxLevel = 0;
+static uint8_t rxLevel = 0;
 extern void changeRxLevel(uint8_t neoRxLevel){
   rxLevel = neoRxLevel;
   if(rxLevel == LOW_RX){
@@ -790,7 +792,7 @@ extern void changeRxLevel(uint8_t neoRxLevel){
     HCI_EXT_SetRxGainCmd(HCI_EXT_RX_GAIN_HIGH);
   }
 }
-uint8_t txLevel = 0;
+static uint8_t txLevel = 0;
 extern void changeTxLevel(uint8_t neoTxLevel){
   txLevel = neoTxLevel;
   if(txLevel == LOW_TX){
@@ -1203,7 +1205,7 @@ static void SimpleBLEPeripheral_stateChangeCB(gaprole_States_t newState)
  * @return  None.
  */
 //禁止连接时的操作
-void meDisableBLEConnect(void){
+static void meDisableBLEConnect(void){
   if(terminateConnectionWithDisabled > 0){
     //挂断后，如果是内部原因挂断，则不允许自动连接
     if(disconnectByInterrupt > 0){
@@ -1237,9 +1239,9 @@ void meDisableBLEConnect(void){
   disconnectByInterrupt = 0;
 }
 //返回：还剩多少个LPA周期
-uint8_t getLPALampLoop(void){
-  return lpaLampLoop;
-}
+//uint8_t getLPALampLoop(void){
+  //return lpaLampLoop;
+//}
 static void SimpleBLEPeripheral_processStateChangeEvt(gaprole_States_t newState)
 {
 #ifdef PLUS_BROADCASTER
@@ -1287,7 +1289,8 @@ static void SimpleBLEPeripheral_processStateChangeEvt(gaprole_States_t newState)
      */
     case GAPROLE_ADVERTISING_NONCONN:
       {
-        uint8_t advertEnabled = FALSE;
+        //uint8_t advertEnabled = FALSE;
+        advertEnabled = FALSE;
 
         // Disable non-connectable advertising.
         GAPRole_SetParameter(GAPROLE_ADV_NONCONN_ENABLED, sizeof(uint8_t),
@@ -1360,7 +1363,8 @@ static void SimpleBLEPeripheral_processStateChangeEvt(gaprole_States_t newState)
           // we will be turning advertising back on.
           if (firstConnFlag == false)
           {
-            uint8_t advertEnabled = FALSE; // Turn on Advertising
+            //uint8_t advertEnabled = FALSE; // Turn on Advertising
+            advertEnabled = FALSE;
 
             // Disable connectable advertising.
             GAPRole_SetParameter(GAPROLE_ADVERT_ENABLED, sizeof(uint8_t),
@@ -1631,18 +1635,20 @@ static void SimpleBLEPeripheral_performInitializeTask(void)
 }
 
 extern void mplTaskAtMainLoop(void);
-uint8_t mplIsInitialized = 0;
-uint8_t adcServiceGo = 0;
-uint8_t batterySampleCount = 0;
-uint16_t adcTempResult = 0;
-uint8_t bleCycleCount = 127;
+//static uint8_t mplIsInitialized = 0;
+static uint8_t adcServiceGo = 0;
+//static uint8_t batterySampleCount = 0;
+static uint16_t adcTempResult = 0;
+//static uint8_t bleCycleCount = 127;
 
-extern uint8_t workStatus = 0; // <-- 自身工作状态
+static uint8_t workStatus = 0; // <-- 自身工作状态
+uint8_t getWorkStatus(void){
+  return workStatus;
+}
 
 //硬件自己主动断开的方法
-void forceStopBLE(void){
+static void forceStopBLE(void){
   //无论在什么情况下，都会强制挂断蓝牙的方法
-  //lpaLampLoop = 0;
   terminateConnectionWithDisabled = 1;
   enableConnectBLE = 0;
   bleStopReason = 1;
@@ -1653,14 +1659,15 @@ void forceStopBLE(void){
 }
 
 //最关键的部分：蓝牙在连通时循环执行的部分
+uint8_t workLevel;
+uint8_t i;
+uint8_t adcTotalNum;
+uint8_t batteryIsLow;
+static uint16_t workResult;
 static void SimpleBLEPeripheral_performPeriodicTask(void)
 {
 #ifndef FEATURE_OAD_ONCHIP
-  uint8_t workLevel;
-  uint8_t i;
-  uint8_t adcTotalNum;
-  uint8_t batteryIsLow;
-  uint16_t workResult = 0;
+  workResult = 0;
   
   long adcSigma;
   workStatus = WORKING_STATUS_OK; // <-- 工作状态：0为正常
@@ -1916,12 +1923,16 @@ static void SimpleBLEPeripheral_enqueueMsg(uint8_t event, uint8_t state)
 }
 
 //0级工况下Advertising的启停
-int dbmChangeFlag = 3;
-int dbmHigh = 0;
-int dbmChangeFlagMax = 3;
-uint8_t advertEnabled = 0;
+//int dbmChangeFlag = 3;
+//int dbmHigh = 0;
+//int dbmChangeFlagMax = 3;
+//uint8_t advertEnabled = 0;
 
+static void stopAdvertising_STAT(void);
 void stopAdvertising(void){
+  stopAdvertising_STAT();
+}
+static void stopAdvertising_STAT(void){
   if(CHARGE_LAMP > 0){
     //灯光响应充电模式
     if(CHARGE_BLINK_AT_CHARGE > 0){
@@ -1951,25 +1962,6 @@ void stopAdvertising(void){
     lpaLampLoop -= 1;
   }
   
-  //测试：修改蓝牙功率
-  if(BLE_VARI_MODE > 0){
-    if(dbmChangeFlag > 0){
-      dbmChangeFlag -= 1;
-      if(dbmChangeFlag <= 0){
-        dbmChangeFlag = dbmChangeFlagMax;
-        if(dbmHigh == 0){
-          dbmHigh = 1;
-          // 3次广播后，变为高功率
-          HCI_EXT_SetTxPowerCmd(HCI_EXT_TX_POWER_5_DBM);
-        }else{
-          dbmHigh = 0;
-          // 3次广播后，变为低功率
-          HCI_EXT_SetTxPowerCmd(HCI_EXT_TX_POWER_0_DBM);
-        }
-      }
-    }
-  }
-  
   //启动广播重启定时器（并判定重启哪种定时器，长定时还是短定时）
   if(enableAutoConnect > 0){
     enableAutoConnect -= 1;
@@ -1983,9 +1975,14 @@ void stopAdvertising(void){
 }
 
 //开始广播：这个方法仅有setSYSTEMWorkLevel(SYSTEM_ENERGY_LEVEL1)时才调用
-uint8_t hasSetDuration = 0;
+static uint8_t hasSetDuration = 0;
+static uint16_t advertDuration;
+static void startAdvertising_STAT(void);
 void startAdvertising(void){
-  bleCycleCount = 127;
+  startAdvertising_STAT();
+}
+static void startAdvertising_STAT(void){
+  //bleCycleCount = 127;
   //测试性亮灯（白灯亮为低功率发射模式，红灯亮为高功率发射模式）
   if(LAMP_TEST_MODE > 0){
     pinDark(1);
@@ -2010,7 +2007,7 @@ void startAdvertising(void){
   //先进入1级状态再开始广播（使能）
   advertEnabled = TRUE;
   //限制广播时间
-  uint16_t advertDuration = ADVERT_DURATION;
+  advertDuration = ADVERT_DURATION;
   if(hasSetDuration == 0){
     //1.50版的Stack，这个参数只能重复设置一次，否则会死机
     GAP_SetParamValue(TGAP_LIM_ADV_TIMEOUT, advertDuration);

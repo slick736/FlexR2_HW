@@ -300,10 +300,10 @@ void buttonCallbackFxn(PIN_Handle handle, PIN_Id pinId){
         //break;
       case SYSTEM_ENERGY_LEVEL2_LPA:
         //准2级工况：变为正2级工况
-        if(workStatus == WORKING_STATUS_REQUEST_DISCONNECT){
+        if(getWorkStatus() == WORKING_STATUS_REQUEST_DISCONNECT){
           return;
         }
-        if(workStatus == WORKING_STATUS_DECLINE_CONNECTION){
+        if(getWorkStatus() == WORKING_STATUS_DECLINE_CONNECTION){
           return;
         }
         //这里是从准2状态进入正2状态的关键

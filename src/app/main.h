@@ -11,6 +11,8 @@
 #define WORKING_STATUS_DECLINE_CONNECTION    9
 #define WORKING_STATUS_REQUEST_DISCONNECT    15
 
+#define HEALEREMG_SERIAL_NUMBER    0x46, 0x52, 0x30, 0x31, 0x30, 0x30, 0x30, 0x31, 0x30, 0x31, 0x30, 0x30, 0x31, 0x30, 0x30, 0x30, 0x30, 0x33, 0x37
+
 #define LOW_RX                  0
 #define HIGH_RX                 1
 #define LOW_TX                  0
@@ -102,7 +104,7 @@
 
 extern void setSYSTEMWorkLevel(uint8_t workLevel);
 extern uint8_t getSYSTEMWorkLevel(void);
-extern void enableStandby(uint8_t standbyEnabled);
+//extern void enableStandby(uint8_t standbyEnabled);
 extern uint8_t setLEDWorkBlink(uint8_t workLevel);
 
 extern int initMPLService(void);
@@ -127,25 +129,25 @@ extern void setSyetemOption(uint16_t sysOption);
 extern uint16_t getSystemOption(void);
 
 //设置与获取个别系统设定的接口（蓝牙不操作此处，但程序内部会用到）
-extern void setEMGOpen(uint8_t neoOpen);
+//extern void setEMGOpen(uint8_t neoOpen);
 extern uint8_t getEMGOpen(void);
 
-extern void setEMGSmooth(uint8_t neoSmo);
+//extern void setEMGSmooth(uint8_t neoSmo);
 extern uint8_t getEMGSmooth(void);
 extern uint8_t getEmgSmoPowByCalc(void);
 
-extern void setEmgSmoPow(uint8_t neoSPo);
+//extern void setEmgSmoPow(uint8_t neoSPo);
 extern uint8_t getEmgSmoPow(void);
 
-extern void setMotionOpen(uint8_t neoMotion);
+//extern void setMotionOpen(uint8_t neoMotion);
 extern uint8_t getMotionOpen(void);
 
-extern void setMPLDFormat(uint8_t neoFmt);
+//extern void setMPLDFormat(uint8_t neoFmt);
 extern uint8_t getMPLDFormat(void);
 
-extern void setMPUWakePower(uint8_t neoPow);
+//extern void setMPUWakePower(uint8_t neoPow);
 extern uint8_t getMPUWakePower(void);
-extern uint16_t getMPUWakePowerByCalc(void);
+//extern uint16_t getMPUWakePowerByCalc(void);
 
 //获取及设置AD转换的数据
 extern uint16_t getBatteryData(void);

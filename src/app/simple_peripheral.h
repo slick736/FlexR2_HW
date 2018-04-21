@@ -77,20 +77,23 @@ extern "C"
  * Task creation function for the Simple BLE Peripheral.
  */
 extern void SimpleBLEPeripheral_createTask(void);
-extern uint8_t terminateConnectionWithDisabled;
+//extern uint8_t terminateConnectionWithDisabled;
 extern uint8_t enableConnectBLE;
-extern void meDisableBLEConnect(void);
+//extern void meDisableBLEConnect(void);
 
 extern void startAdvertising(void);
 extern void stopAdvertising(void);
 extern uint8_t bleStopReason;
 
-extern uint8_t getLPALampLoop(void);
-extern uint8_t enableAutoConnect;
+//extern uint8_t getLPALampLoop(void);
+//extern uint8_t enableAutoConnect;
 extern uint8_t bleIsToClose;
 
-extern uint8_t workStatus;
-extern uint8_t heartBeatCount;
+//extern uint8_t workStatus;
+//extern uint8_t heartBeatCount;
+extern uint8_t getWorkStatus(void);
+extern void clearHeartBeatCount(void);
+extern uint8_t getHeartBeatCount(void);
 
 extern void changeRxLevel(uint8_t neoRxLevel);
 extern void changeTxLevel(uint8_t neoTxLevel);

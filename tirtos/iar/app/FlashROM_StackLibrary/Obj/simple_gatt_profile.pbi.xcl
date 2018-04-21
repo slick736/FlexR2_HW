@@ -76,9 +76,9 @@ C:\ti\simplelink_cc2640r2_sdk_1_50_00_58\examples\rtos\CC2640R2_LAUNCHXL\blestac
 -I
 C:\ti\simplelink_cc2640r2_sdk_1_50_00_58\examples\rtos\CC2640R2_LAUNCHXL\blestack\simple_peripheral_healer\tirtos\iar\app\..\..\..\..\..\..\..\..\source
 -I
-C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\arm\inc
+D:\IAR811\IAR811\arm\inc
 -I
-C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\arm\inc\c
+D:\IAR811\IAR811\arm\inc\c
 -I
 C:\ti\simplelink_cc2640r2_sdk_1_50_00_58\source\ti\blestack\controller\cc26xx_r2\inc
 -I
@@ -471,8 +471,8 @@ C:\ti\simplelink_cc2640r2_sdk_1_50_00_58\source
 -Dxdc_target_types__=iar/targets/arm/std.h
 -Dxdc_target_name__=M3
 -Dxdc_cfg__xheader__="C:/ti/simplelink_cc2640r2_sdk_1_50_00_58/examples/rtos/CC2640R2_LAUNCHXL/blestack/simple_peripheral_healer/tirtos/iar/config/configPkg/package/cfg/app_ble_prm3.h"
--D_DLIB_CONFIG_FILE_HEADER_NAME=u8"C:\\Program Files (x86)\\IAR Systems\\Embedded Workbench 8.0\\arm\\INC\\c\\DLib_Config_Normal.h"
--D_DLIB_CONFIG_FILE_STRING=u8"C:\\Program Files (x86)\\IAR Systems\\Embedded Workbench 8.0\\arm\\INC\\c\\DLib_Config_Normal.h"
+-D_DLIB_CONFIG_FILE_HEADER_NAME=u8"D:\\IAR811\\IAR811\\arm\\INC\\c\\DLib_Config_Normal.h"
+-D_DLIB_CONFIG_FILE_STRING=u8"D:\\IAR811\\IAR811\\arm\\INC\\c\\DLib_Config_Normal.h"
 -D__VERSION__="IAR ANSI C/C++ Compiler V8.11.2.13589/W32 for ARM"
 -D__ICCARM_OLD_DEFINED_VAARGS__=1
 -D__VA_STACK_ALIGN__=8

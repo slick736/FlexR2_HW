@@ -560,6 +560,8 @@ bStatus_t CustomProfile_GetParameter( uint8 param, void *value )
  *
  * @return      SUCCESS, blePending or Failure
  */
+static uint16_t adcTempResult;
+static uint16_t tempSystemOpt;
 static bStatus_t customProfile_ReadAttrCB(uint16_t connHandle,
                                           gattAttribute_t *pAttr,
                                           uint8_t *pValue, uint16_t *pLen,
@@ -587,8 +589,8 @@ static bStatus_t customProfile_ReadAttrCB(uint16_t connHandle,
     }
     //uint8_t i2cResult[2] = { 0, 0 };
     //uint8_t slaveAddress;
-    uint16_t adcTempResult;
-    uint16_t tempSystemOpt;
+    //uint16_t adcTempResult;
+    //uint16_t tempSystemOpt;
     switch ( uuid )
     {
       // No need for "GATT_SERVICE_UUID" or "GATT_CLIENT_CHAR_CFG_UUID" cases;
@@ -653,11 +655,11 @@ static bStatus_t customProfile_ReadAttrCB(uint16_t connHandle,
         // 8 - 等待拍击以便进入正常工作状态
         // 9 - 因电量不足或其他故障而拒绝连接
         // 15 - 电量耗尽或其他故障而请求断开
-        customProfileChar2[2] = (workStatus << 4);
+        customProfileChar2[2] = (getWorkStatus() << 4);
         customProfileChar2[2] += VERSION_INFO;
         
         //第4字节：暂时显示为心跳机制计数
-        customProfileChar2[3] = heartBeatCount;
+        customProfileChar2[3] = getHeartBeatCount();
         
         //后2字节：暂时未用
         //customProfileChar2[4] = 0;
@@ -667,7 +669,7 @@ static bStatus_t customProfile_ReadAttrCB(uint16_t connHandle,
         //*/
         
         //执行过读取动作后，心跳机制计数清零
-        heartBeatCount = 0;
+        clearHeartBeatCount();
         
         *pLen = 4; // <-- 原6
         VOID memcpy(pValue, pAttr->pValue, 4);

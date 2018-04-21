@@ -109,15 +109,15 @@ bleUserCfg_t user0Cfg = BLE_USER_CFG;
 
 //global 公用变量
 //系统设定值：是否打开MPL的dmpRead功能
-uint8_t enableReadMPL = 0;
-uint8_t enableReadADC = 0;
-void mpuHibernate(void);
-void adcOff(void);
-void mpuWakeUp(void);
-void adcOn(void);
-void mpuIntoLPA(void);
-void mpuIntoLPMIM(void);
-void mpuOutOfLPMIM(void);
+static uint8_t enableReadMPL = 0;
+static uint8_t enableReadADC = 0;
+static void mpuHibernate(void);
+static void adcOff(void);
+static void mpuWakeUp(void);
+static void adcOn(void);
+static void mpuIntoLPA(void);
+static void mpuIntoLPMIM(void);
+static void mpuOutOfLPMIM(void);
 
 //预定义的总体设置接口
 void setEMGFreq(uint8_t neoFreq);
@@ -142,27 +142,27 @@ void setSyetemOption(uint16_t sysOption);
 uint16_t getSystemOption(void);
 
 //预定义的个别设置接口
-void setEMGOpen(uint8_t neoOpen);
+static void setEMGOpen(uint8_t neoOpen);
 uint8_t getEMGOpen(void);
 
-void setEMGSmooth(uint8_t neoSmo);
+static void setEMGSmooth(uint8_t neoSmo);
 uint8_t getEMGSmooth(void);
 
-void setEmgSmoPow(uint8_t neoSPo);
+static void setEmgSmoPow(uint8_t neoSPo);
 uint8_t getEmgSmoPow(void);
 
-uint8_t motionIsOpen;
-void setMotionOpen(uint8_t neoMotion);
+static uint8_t motionIsOpen;
+static void setMotionOpen(uint8_t neoMotion);
 uint8_t getMotionOpen(void);
 
-void setMPLDFormat(uint8_t neoFmt);
+static void setMPLDFormat(uint8_t neoFmt);
 uint8_t getMPLDFormat(void);
 
-void setMPUWakePower(uint8_t neoPow);
+static void setMPUWakePower(uint8_t neoPow);
 uint8_t getMPUWakePower(void);
-uint16_t getMPUWakePowerByCalc(void);
+static uint16_t getMPUWakePowerByCalc(void);
 
-void setHALReport(uint8_t dataSort);
+static void setHALReport(uint8_t dataSort);
 
 uint8_t isStandbyEnabled = 0;
 
@@ -172,13 +172,13 @@ uint8_t isStandbyEnabled = 0;
 #define THREADSTACKSIZE   (768)
 
 /* ADC conversion result variables */
-uint16_t adcValue0;
-uint16_t adcValue1[ADC_SAMPLE_COUNT];
+//static uint16_t adcValue0;
+//static uint16_t adcValue1[ADC_SAMPLE_COUNT];
 //ADC转换及初始化结果
 uint8_t adcInitResult = 0x02;
 uint8_t adcConvertResult = 0xF0;
 int_fast16_t res;
-uint16_t rtcTickPeriod;
+static uint16_t rtcTickPeriod;
 
 #include "ex_include_tirtos.h"
 #include "scif.h"
@@ -217,13 +217,13 @@ void scCtrlReadyCallback(void) {
 } // ctrlReadyCallback
 
 //ADC相关的数据采集函数========================================================
+static uint16_t adcTempResult = 0;
 uint16_t getADCData(void){
   //ADC采集区的数据头尾
-  uint16_t adcTempResult = 0;
   adcTempResult = scifTaskData.muscleBattery.output.muscleValue;
   return adcTempResult;
 }
-uint16_t smoothedEMGData = 0;
+static uint16_t smoothedEMGData = 0;
 void setSmoothedEMGData(uint16_t smoothedData){
   smoothedEMGData = smoothedData;
 }
@@ -232,10 +232,12 @@ uint16_t getSmoothedEMGData(void){
 }
 uint16_t getBatteryData(void){
   //ADC采集区的数据头尾
-  uint16_t adcTempResult = 0;
   adcTempResult = scifTaskData.muscleBattery.output.batteryValue;
   return adcTempResult;
 }
+
+//功耗相关
+static void enableStandby(uint8_t standbyEnabled);
 
 //从这里开始是MPL相关==========================================================
 //=============================================================================
@@ -349,6 +351,8 @@ static struct platform_data_s compass_pdata = {
 
 //注意这里，原STM32F4程序中的empl_send是从UART口送出的
 //移植到CC2640R2F后要全部都从蓝牙输出
+
+
 static void read_from_mpl(void)
 {
   if(enableReadMPL == 0){
@@ -514,7 +518,7 @@ static void android_orient_cb(unsigned char orientation)
 	}
 }
 
-
+/*
 static inline void run_self_test(void)
 {
     int result;
@@ -526,7 +530,6 @@ static inline void run_self_test(void)
     result = mpu_run_self_test(gyro, accel);
 #endif
     if (result == 0x7) {
-      /*
 	MPL_LOGI("Passed!\n");
         MPL_LOGI("accel: %7.4f %7.4f %7.4f\n",
                     accel[0]/65536.f,
@@ -536,14 +539,10 @@ static inline void run_self_test(void)
                     gyro[0]/65536.f,
                     gyro[1]/65536.f,
                     gyro[2]/65536.f);
-      */
-        /* Test passed. We can trust the gyro data here, so now we need to update calibrated data*/
+        // Test passed. We can trust the gyro data here, so now we need to update calibrated data
 
 #ifdef USE_CAL_HW_REGISTERS
-        /*
-         * This portion of the code uses the HW offset registers that are in the MPUxxxx devices
-         * instead of pushing the cal data to the MPL software library
-         */
+        
         unsigned char i = 0;
 
         for(i = 0; i < 3; i++) {
@@ -561,11 +560,7 @@ static inline void run_self_test(void)
         mpu_set_accel_bias_6050_reg(accel);
 #endif
 #else
-        /* Push the calibrated data to the MPL library.
-         *
-         * MPL expects biases in hardware units << 16, but self test returns
-		 * biases in g's << 16.
-		 */
+        
     	unsigned short accel_sens;
     	float gyro_sens;
 
@@ -594,6 +589,7 @@ static inline void run_self_test(void)
      }
 
 }
+*/
 
 //=============================================================================
 //=============================================================================
@@ -828,7 +824,7 @@ int initMPLService_STEP5(void){
 }
 
 //设置：hal.report应该输出什么类型的数据
-void setHALReport(uint8_t dataSort){
+static void setHALReport(uint8_t dataSort){
   hal.report = 0;
   switch(dataSort){
   case 0:
@@ -879,7 +875,7 @@ void setHALReport(uint8_t dataSort){
 }
 
 //改变dmp/mpu运算速率
-void setMotionRate(uint8_t motionRate){
+static void setMotionRate(uint8_t motionRate){
   dmp_set_fifo_rate(motionRate);
   inv_set_quat_sample_rate(1000000L / motionRate);
   mpu_set_sample_rate(motionRate);
@@ -918,14 +914,14 @@ static void setup_gyro(void)
 
 //中断保护。这部分内容原本必须在MPU向MCU发送中断信号时才执行
 //意义：MPU必须先向MCU报告“准备好”才能作陀螺仪的融合运算
-//目前在CC2640R2F中暂时屏蔽这个功能，在今后优化的时候加回来
-void gyro_data_ready_cb(void)
+//目前在CC2640R2F中暂时屏蔽这个功能，在今后优化的时候可能会加回来
+static void gyro_data_ready_cb(void)
 {
     hal.new_gyro = 1;
 }
                      
 //传感器的启动和休眠
-void mpuHibernate(void){
+static void mpuHibernate(void){
   //如果MPU处于低功耗加速计状态，就取消它
   hal.sensors &= ~ACCEL_ON;
   hal.sensors &= ~GYRO_ON;
@@ -939,7 +935,7 @@ void mpuHibernate(void){
   mpu_set_dmp_state(0);
   enableReadMPL = 0;
 }
-void adcOff(void){
+static void adcOff(void){
   if(enableReadADC == 0){
     return;
   }
@@ -947,7 +943,7 @@ void adcOff(void){
   scifStopRtcTicks();
   enableReadADC = 0;
 }
-void mpuWakeUp(void){
+static void mpuWakeUp(void){
   if(enableReadMPL > 0){
     return;
   }
@@ -961,7 +957,7 @@ void mpuWakeUp(void){
   mpu_set_dmp_state(1);
   enableReadMPL = 1;
 }
-void adcOn(void){
+static void adcOn(void){
   if(enableReadADC > 0){
     return;
   }
@@ -970,7 +966,7 @@ void adcOn(void){
   scifStartTasksNbl(BV(SCIF_MUSCLE_BATTERY_TASK_ID));
   enableReadADC = 1;
 }
-void mpuIntoLPA(void){
+static void mpuIntoLPA(void){
   if(hal.dmp_on){
     return;
   }
@@ -987,7 +983,7 @@ void mpuIntoLPA(void){
   hal.lp_accel_mode = 1;
   mpuIntoLPMIM();
 }
-void mpuIntoLPMIM(void){
+static void mpuIntoLPMIM(void){
   if(hal.motion_int_mode > 0){
     //已经处于低功耗加速计模式时不再重复设定
     return;
@@ -1001,7 +997,7 @@ void mpuIntoLPMIM(void){
   inv_compass_was_turned_off();
   inv_quaternion_sensor_was_turned_off();
 }
-void mpuOutOfLPMIM(void){
+static void mpuOutOfLPMIM(void){
   if(hal.motion_int_mode == 0){
     //已经脱离低功耗加速计模式时不再重复设定
     return;
@@ -1012,23 +1008,21 @@ void mpuOutOfLPMIM(void){
 }
 
 //定义MPU的几种工作状态
-uint8_t systemWorkLevel = 127; // <-- 刚刚开机时不属于以下任何一种情况
+static uint8_t systemWorkLevel = 127; // <-- 刚刚开机时不属于以下任何一种情况
+static void setSYSTEMWorkLevel_STAT(uint8_t workLevel);
 void setSYSTEMWorkLevel(uint8_t workLevel){
+  setSYSTEMWorkLevel_STAT(workLevel);
+}
+static void setSYSTEMWorkLevel_STAT(uint8_t workLevel){
   if(systemWorkLevel > SYSTEM_ENERGY_LEVEL1 && systemWorkLevel == workLevel){
     //如果设置参数等于当前工作等级，就什么也不做
     return;
   }
   systemWorkLevel = workLevel;
-  //改变LED工作状态（如果LPA周期未结束就不变灯）
-  //if(getLPALampLoop() <= 0){
-    //setLEDWorkBlink(workLevel);
-  //}
   switch(workLevel){
   case SYSTEM_ENERGY_LEVEL0:
     //0级工作状态
     motionIsOpen = 0;
-    //mpuHibernate();
-    //mpuIntoLPA();
     adcOff();
     emgPortOpen(0);
     //0级工作状态时暂停MCU（注意0级工作状态只能由1级切换到，或者开机时切换到）
@@ -1043,12 +1037,7 @@ void setSYSTEMWorkLevel(uint8_t workLevel){
     if(ENABLE_AUTO_SLEEP > 0){
       enableStandby(1);
     }
-    //进入短广播还是长广播
-    //if(longAdvertiseFlag <= 0){
-      startAdvertising(); // <-- 该方法只有这个函数才调用
-    //}else{
-      //startLongAdvertising(); // <-- 该方法只有这个函数才调用
-    //}
+    startAdvertising(); // <-- 该方法只有这个函数才调用
     motionIsOpen = 0;
     if(ENABLE_AUTO_SLEEP == 0){
       mpuOutOfLPMIM();
@@ -1119,9 +1108,14 @@ uint8_t getSYSTEMWorkLevel(void){
   return systemWorkLevel;
 }
 //即时判断系统应该如何亮灯
-uint8_t ledWorkLevel = 127;
+static uint8_t ledWorkLevel = 127;
+static uint8_t setLEDWorkBlink_STAT(uint8_t workLevel);
 uint8_t setLEDWorkBlink(uint8_t workLevel){
-  uint8_t batteryIsLow = 0;
+  return setLEDWorkBlink_STAT(workLevel);
+}
+static uint8_t batteryIsLow = 0;
+static uint8_t setLEDWorkBlink_STAT(uint8_t workLevel){
+  batteryIsLow = 0;
   if(workLevel <= SYSTEM_ENERGY_LEVEL1){
     //关机、待机
     ledWorkLevel = 0;
@@ -1188,7 +1182,11 @@ uint8_t setLEDWorkBlink(uint8_t workLevel){
 
 //注意，这个方法目前写在蓝牙的主循环内，因此MPL的实际采样率不会大于
 //蓝牙事件的循环速率
+static void mplTaskAtMainLoop_STAT(void);
 void mplTaskAtMainLoop(void){
+  mplTaskAtMainLoop_STAT();
+}
+static void mplTaskAtMainLoop_STAT(void){
   
   if(enableReadMPL == 0){
     //关闭了readMPL的功能
@@ -1597,7 +1595,7 @@ static uint8_t rFSwitchNotifyCb(uint8_t eventType, uint32_t *eventArg,
 #endif //CC1350_LAUNCHXL || POWER_SAVING
 
 //Power Policy Change
-void enableStandby(uint8_t standbyEnabled){
+static void enableStandby(uint8_t standbyEnabled){
   if(standbyEnabled > 0){
     //允许进入待机状态
     if(isStandbyEnabled > 0){
@@ -1644,8 +1642,8 @@ uint8_t getMPLFreq(void){
 //个别系统设定的写入和读取========================================================
 
 //是否打开EMG-接口
-uint8_t emgIsOpen = 0;
-void setEMGOpen(uint8_t neoOpen){
+static uint8_t emgIsOpen = 0;
+static void setEMGOpen(uint8_t neoOpen){
   if(emgIsOpen != neoOpen){
     if(neoOpen > 0){
       //打开EMG
@@ -1663,7 +1661,7 @@ uint8_t getEMGOpen(void){
 
 //肌电是否平滑处理-接口
 uint8_t emgSmooth = 0;
-void setEMGSmooth(uint8_t neoSmo){
+static void setEMGSmooth(uint8_t neoSmo){
   emgSmooth = neoSmo;
 }
 uint8_t getEMGSmooth(void){
@@ -1672,7 +1670,7 @@ uint8_t getEMGSmooth(void){
 
 //肌电平滑处理力度-接口
 uint8_t emgSmoPow = 0;
-void setEmgSmoPow(uint8_t neoSPo){
+static void setEmgSmoPow(uint8_t neoSPo){
   emgSmoPow = neoSPo;
 }
 uint8_t getEmgSmoPow(void){
@@ -1686,8 +1684,8 @@ uint8_t getEmgSmoPowByCalc(void){
 }
 
 //是否打开MOTION-接口
-uint8_t motionIsOpen = 0;
-void setMotionOpen(uint8_t neoMotion){
+static uint8_t motionIsOpen = 0;
+static void setMotionOpen(uint8_t neoMotion){
   if(motionIsOpen != neoMotion){
     if(neoMotion > 0){
       //打开Motion
@@ -1704,8 +1702,8 @@ uint8_t getMotionOpen(void){
 }
 
 //MPL输出何种格式数据-接口
-uint8_t mplDataFormat = DEFAULT_OUTPUT_FORMAT; //初始状态下为欧拉角
-void setMPLDFormat(uint8_t neoFmt){
+static uint8_t mplDataFormat = DEFAULT_OUTPUT_FORMAT; //初始状态下为欧拉角
+static void setMPLDFormat(uint8_t neoFmt){
   mplDataFormat = neoFmt;
   setHALReport(mplDataFormat);
 }
@@ -1714,14 +1712,14 @@ uint8_t getMPLDFormat(void){
 }
 
 //唤醒MPU的力度设定
-uint8_t mpuWakePower = MPU_WAKE_POWER_DEFAULT; //初始状态下为1.0g唤醒
-void setMPUWakePower(uint8_t neoPow){
+static uint8_t mpuWakePower = MPU_WAKE_POWER_DEFAULT; //初始状态下为1.0g唤醒
+static void setMPUWakePower(uint8_t neoPow){
   mpuWakePower = neoPow;
 }
 uint8_t getMPUWakePower(void){
   return mpuWakePower;
 }
-uint16_t getMPUWakePowerByCalc(void){
+static uint16_t getMPUWakePowerByCalc(void){
   uint16_t mpuWakePowerCalc = 4;
   mpuWakePowerCalc = mpuWakePowerCalc * mpuWakePower;
   return mpuWakePowerCalc;
@@ -1730,34 +1728,44 @@ uint16_t getMPUWakePowerByCalc(void){
 //================================================================================
 
 //写入系统设定====================================================================
+static uint8_t _mpuWakePower = 0;
+static uint8_t _mpuIsOpen = 0;
+static uint8_t _systemOptions = 0;
+static uint8_t _mplDataFormat = 0;
+static uint8_t _emgSmoPow = 0;
+static uint8_t _emgSmooth = 0;
+static void setSyetemOption_STAT(uint16_t sysOption);
 void setSyetemOption(uint16_t sysOption){
+  setSyetemOption_STAT(sysOption);
+}
+static void setSyetemOption_STAT(uint16_t sysOption){
   //修正BUG：如果系统工作模式不足正2级，则拒绝接受一切指令
   if(getSYSTEMWorkLevel() < SYSTEM_ENERGY_LEVEL2){
     return;
   }
   
   //MPU唤醒力度多大？
-  uint8_t _mpuWakePower = sysOption >> 8;
+  _mpuWakePower = sysOption >> 8;
   setMPUWakePower(_mpuWakePower);
-  uint8_t _systemOptions = sysOption % 256;
+  _systemOptions = sysOption % 256;
   
   //MPU打开？
-  uint8_t _mpuIsOpen = _systemOptions >> 7;
+  _mpuIsOpen = _systemOptions >> 7;
   setMotionOpen(_mpuIsOpen);
   _systemOptions = sysOption % 128;
   
   //MPL数据格式？
-  uint8_t _mplDataFormat = _systemOptions >> 4;
+  _mplDataFormat = _systemOptions >> 4;
   setMPLDFormat(_mplDataFormat);
   _systemOptions = sysOption % 16;
   
   //EMG平滑力度？
-  uint8_t _emgSmoPow = _systemOptions >> 2;
+  _emgSmoPow = _systemOptions >> 2;
   setEmgSmoPow(_emgSmoPow);
   _systemOptions = sysOption % 4;
   
   //EMG是否平滑？
-  uint8_t _emgSmooth = _systemOptions >> 1;
+  _emgSmooth = _systemOptions >> 1;
   setEMGSmooth(_emgSmooth);
   _systemOptions = sysOption % 2;
   
@@ -1767,33 +1775,38 @@ void setSyetemOption(uint16_t sysOption){
 //================================================================================
 
 //获取总的系统设定================================================================
+static uint16_t _allOptions = 0;
+static uint16_t getSystemOption_STAT(void);
 uint16_t getSystemOption(void){
-  uint16_t allOptions = 0;
+  return getSystemOption_STAT();
+}
+static uint16_t getSystemOption_STAT(void){
+  _allOptions = 0;
   
   //MPU唤醒力度多大？
-  allOptions += mpuWakePower;
+  _allOptions += mpuWakePower;
   
   //MPU打开？
-  allOptions <<= 1;
-  allOptions += motionIsOpen;
+  _allOptions <<= 1;
+  _allOptions += motionIsOpen;
   
   //MPL数据格式？
-  allOptions <<= 3;
-  allOptions += mplDataFormat;
+  _allOptions <<= 3;
+  _allOptions += mplDataFormat;
   
   //EMG平滑力度？
-  allOptions <<= 2;
-  allOptions += emgSmoPow;
+  _allOptions <<= 2;
+  _allOptions += emgSmoPow;
   
   //EMG是否平滑？
-  allOptions <<= 1;
-  allOptions += emgSmooth;
+  _allOptions <<= 1;
+  _allOptions += emgSmooth;
   
   //EMG是否打开？
-  allOptions <<= 1;
-  allOptions += emgIsOpen;
+  _allOptions <<= 1;
+  _allOptions += emgIsOpen;
   
-  return allOptions;
+  return _allOptions;
 }
 //================================================================================
 
