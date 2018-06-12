@@ -333,7 +333,7 @@ static uint8_t scanRspData[] =
 {
   // complete name
   //0x09, GAP_ADTYPE_LOCAL_NAME_COMPLETE, 'F','L','E','X','R','-','I','I',
-  0x14,
+  0x12,
   GAP_ADTYPE_LOCAL_NAME_COMPLETE,
   HEALEREMG_SERIAL_NUMBER,
 
