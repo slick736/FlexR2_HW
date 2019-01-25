@@ -1653,7 +1653,7 @@ __FAR__ const xdc_SizeT ti_sysbios_knl_Task_Module_State_terminatedQ__O = offset
  *  Define absolute path prefix for this executable's
  *  configuration generated files.
  */
-xdc__META(__ASM__, "@(#)__ASM__ = C:/ti/simplelink_cc2640r2_sdk_1_50_00_58/examples/rtos/CC2640R2_LAUNCHXL/blestack/simple_peripheral_healer/tirtos/iar/config/configPkg/package/cfg/app_ble_prm3");
+xdc__META(__ASM__, "@(#)__ASM__ = C:/ti/simplelink_cc2640r2_sdk_1_50_00_58/examples/rtos/CC2640R2_LAUNCHXL/blestack/simple_peripheral/tirtos/iar/config/configPkg/package/cfg/app_ble_prm3");
 
 /*
  *  ======== __ISA__ ========

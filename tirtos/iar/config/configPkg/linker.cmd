@@ -3,8 +3,8 @@
  * linkcmd.xdt in the ti.platforms.tiva package and will be overwritten.
  */
 
-"C:\ti\simplelink_cc2640r2_sdk_1_50_00_58\examples\rtos\CC2640R2_LAUNCHXL\blestack\simple_peripheral_healer\tirtos\iar\config\configPkg\package\cfg\app_ble_prm3.orm3"
-"C:\ti\simplelink_cc2640r2_sdk_1_50_00_58\examples\rtos\CC2640R2_LAUNCHXL\blestack\simple_peripheral_healer\tirtos\src\sysbios\rom_sysbios.arm3"
+"C:\ti\simplelink_cc2640r2_sdk_1_50_00_58\examples\rtos\CC2640R2_LAUNCHXL\blestack\simple_peripheral\tirtos\iar\config\configPkg\package\cfg\app_ble_prm3.orm3"
+"C:\ti\simplelink_cc2640r2_sdk_1_50_00_58\examples\rtos\CC2640R2_LAUNCHXL\blestack\simple_peripheral\tirtos\src\sysbios\rom_sysbios.arm3"
 "C:\ti\simplelink_cc2640r2_sdk_1_50_00_58\kernel\tirtos\packages\iar\targets\arm\rts\lib\release\boot.arm3"
 
 

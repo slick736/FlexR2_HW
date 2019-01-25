@@ -6,7 +6,7 @@
 
 "-p" 
 
-"C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\arm\CONFIG\debugger\TexasInstruments\CC2640R2F.ddf" 
+"D:\IAR811\arm\CONFIG\debugger\TexasInstruments\CC2640R2F.ddf" 
 
 "--semihosting=none" 
 

@@ -161,23 +161,23 @@ static uint8 devInfoModelNumber[DEVINFO_STR_ATTR_LEN+1] = "Model Number";
 
 // Serial Number String characteristic
 static uint8 devInfoSerialNumberProps = GATT_PROP_READ | GATT_PROP_WRITE;
-static uint8 devInfoSerialNumber[DEVINFO_STR_ATTR_LEN+1] = "Serial Number";
+static uint8 devInfoSerialNumber[DEVINFO_STR_ATTR_LEN+1] = "181202017000102";
 
 // Firmware Revision String characteristic
 static uint8 devInfoFirmwareRevProps = GATT_PROP_READ | GATT_PROP_WRITE;
-static uint8 devInfoFirmwareRev[DEVINFO_STR_ATTR_LEN+1] = "Firmware Revision";
+static uint8 devInfoFirmwareRev[DEVINFO_STR_ATTR_LEN+1] = "1.0.0.0";
 
 // Hardware Revision String characteristic
 static uint8 devInfoHardwareRevProps = GATT_PROP_READ | GATT_PROP_WRITE;
-static uint8 devInfoHardwareRev[DEVINFO_STR_ATTR_LEN+1] = "Hardware Revision";
+static uint8 devInfoHardwareRev[DEVINFO_STR_ATTR_LEN+1] = "1.1.0.1";
 
 // Software Revision String characteristic
 static uint8 devInfoSoftwareRevProps = GATT_PROP_READ | GATT_PROP_WRITE;
-static uint8 devInfoSoftwareRev[DEVINFO_STR_ATTR_LEN+1] = "Software Revision";
+static uint8 devInfoSoftwareRev[DEVINFO_STR_ATTR_LEN+1] = "1.1.0.1";
 
 // Manufacturer Name String characteristic
 static uint8 devInfoMfrNameProps = GATT_PROP_READ | GATT_PROP_WRITE;
-static uint8 devInfoMfrName[DEVINFO_STR_ATTR_LEN+1] = "Manufacturer Name";
+static uint8 devInfoMfrName[DEVINFO_STR_ATTR_LEN+1] = "Healer Tech";
 
 // PnP ID characteristic
 static uint8 devInfoPnpIdProps = GATT_PROP_READ | GATT_PROP_WRITE;

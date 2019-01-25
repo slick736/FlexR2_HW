@@ -205,7 +205,7 @@ static uint8_t disconnectByInterrupt = 0;
 #define DEFAULT_CONN_PAUSE_PERIPHERAL         6
 
 // How often to perform periodic event (in msec)
-#define SBP_PERIODIC_EVT_PERIOD               25 // 25, <-- Original 5000
+#define SBP_PERIODIC_EVT_PERIOD               1 // 原 25
 //#define SBP_PERIODIC_EVT_PERIOD               500 // <-- 1秒1次ADC与MPU交替循环
 #define SBP_INITIALIZE_EVT_PERIOD             200 // <-- 执行初始化时，每个工作步骤间隔200ms
 
@@ -307,9 +307,14 @@ static ICall_SyncHandle syncEvent;
 
 // Clock instances for internal periodic events.
 static Clock_Struct periodicClock;
+static Clock_Struct emgGetClock;
+static Clock_Struct emgLastGetClock;
 static Clock_Struct initializeClock;
 static Clock_Struct advertiseClock;
 static Clock_Struct advertiseShortClock;
+
+//一秒一次的时钟，用于统计EMG和FPS
+static Clock_Struct emgFPSClock;
 
 // Queue object used for app messages
 static Queue_Struct appMsg;
@@ -428,11 +433,14 @@ static void EulerPeripheral_processCharValueChangeEvt(uint8_t paramID);
 
 static void SimpleBLEPeripheral_performPeriodicTask(void);
 static void SimpleBLEPeripheral_clockHandler(UArg arg);
+static void SimpleBLEPeripheral_emgHandler(UArg arg);
+static void SimpleBLEPeripheral_emgLastHandler(UArg arg);
 
 static void SimpleBLEPeripheral_performInitializeTask(void);
 static void SimpleBLEPeripheral_initializeHandler(UArg arg);
 
 static void SimpleBLEPeripheral_advertiseHandler(UArg arg);
+static void SimpleBLEPeripheral_emgFPSHandler(UArg arg);
 
 static void SimpleBLEPeripheral_sendAttRsp(void);
 static void SimpleBLEPeripheral_freeAttRsp(uint8_t status);
@@ -471,6 +479,22 @@ uint16_t adcValue0Result;
 uint8_t adcStackIndi = 0;
 uint8_t adcStackPointer = 0;
 uint16_t adcSamples[ADC_SMOOTH_FORCE_MAX];
+
+//ADC采样循环相关变量
+uint8_t emgCycleCount = 0;
+
+//输出EMG和FPS速率
+uint16_t emgCount = 0;
+uint16_t emgCount_OUT = 0;
+extern uint16_t getEMGCount_OUT(void){
+  return emgCount_OUT;
+}
+
+uint8_t fpsCount = 0;
+uint8_t fpsCount_OUT = 0;
+extern uint8_t getFPSCount_OUT(void){
+  return fpsCount_OUT;
+}
 
 /*********************************************************************
  * PROFILE CALLBACKS
@@ -587,8 +611,13 @@ static void SimpleBLEPeripheral_init(void)
   appMsgQueue = Util_constructQueue(&appMsg);
 
   // Create one-shot clocks for internal periodic events.
+  //SBP_PERIODIC_EVT_PERIOD
   Util_constructClock(&periodicClock, SimpleBLEPeripheral_clockHandler,
-                      SBP_PERIODIC_EVT_PERIOD, 0, false, SBP_PERIODIC_EVT);
+                      6, 0, false, NULL); // <-- 原 10
+  Util_constructClock(&emgGetClock, SimpleBLEPeripheral_emgHandler,
+                      1, 0, false, NULL);
+  Util_constructClock(&emgLastGetClock, SimpleBLEPeripheral_emgLastHandler,
+                      1, 0, false, SBP_PERIODIC_EVT);
   // Create one-shot clocks for initialization events.
   Util_constructClock(&initializeClock, SimpleBLEPeripheral_initializeHandler,
                       SBP_INITIALIZE_EVT_PERIOD, 0, false, SBP_INITIALIZE_EVT);
@@ -597,6 +626,10 @@ static void SimpleBLEPeripheral_init(void)
                       1000 * ADVERT_SLEEP_DURATION, 0, false, NULL);
   Util_constructClock(&advertiseShortClock, SimpleBLEPeripheral_advertiseHandler,
                       100, 0, false, NULL);
+  
+  //这个时钟用于统计1s内抓取了多少EMG，还有实际蓝牙输出的FPS
+  Util_constructClock(&emgFPSClock, SimpleBLEPeripheral_emgFPSHandler,
+                      1000, 0, false, NULL);
 
   //display功能不需要，这里屏蔽
   //dispHandle = Display_open(SBP_DISPLAY_TYPE, NULL);
@@ -904,6 +937,7 @@ static void SimpleBLEPeripheral_taskFxn(UArg a0, UArg a1)
       {
         //等待计时完成一次后再生成一个SBP_PERIODIC_EVT事件
         Util_startClock(&periodicClock);
+        //Util_startClock(&emgGetClock);
         // Perform periodic application task
         SimpleBLEPeripheral_performPeriodicTask();
       }
@@ -1237,6 +1271,8 @@ static void meDisableBLEConnect(void){
     setSYSTEMWorkLevel(SYSTEM_ENERGY_LEVEL1_LPA);
   }
   disconnectByInterrupt = 0;
+  //EMG采样计数归零
+  emgCycleCount = 0;
 }
 //返回：还剩多少个LPA周期
 //uint8_t getLPALampLoop(void){
@@ -1322,6 +1358,9 @@ static void SimpleBLEPeripheral_processStateChangeEvt(gaprole_States_t newState)
         //打开时钟，等待计时结束，事件生成后执行perodicTask
         //注：只有蓝牙已连接状况下才执行
         Util_startClock(&periodicClock);
+        if(FPS_STATUS_MODE){
+          Util_startClock(&emgFPSClock);
+        }
         //建立连接时，将心跳机制计数清零
         heartBeatCount = 0;
         //接受蓝牙请求，蓝牙连接，进入2级工作状态
@@ -1389,6 +1428,9 @@ static void SimpleBLEPeripheral_processStateChangeEvt(gaprole_States_t newState)
     case GAPROLE_WAITING_AFTER_TIMEOUT:
       //这里是蓝牙断开时最先执行的部分
       Util_stopClock(&periodicClock);
+      Util_stopClock(&emgGetClock);
+      Util_stopClock(&emgLastGetClock);
+      Util_stopClock(&emgFPSClock);
       //这里，只要一停掉使用蓝牙的程序，或者人工挂断连接，蓝牙就断开
       SimpleBLEPeripheral_freeAttRsp(bleNotConnected);
       //心跳机制清零
@@ -1555,6 +1597,7 @@ static void SimpleBLEPeripheral_performInitializeTask(void)
 {
   uint8_t i;
   PIN_GLight();
+  //PIN_RLight();
   //这里处理MPU初始化线程
   if(AXIS_9_FUSION_MODE > 0){
     //9轴模式运行
@@ -1653,6 +1696,9 @@ static void forceStopBLE(void){
   enableConnectBLE = 0;
   bleStopReason = 1;
   Util_stopClock(&periodicClock);
+  Util_stopClock(&emgGetClock);
+  Util_stopClock(&emgLastGetClock);
+  Util_stopClock(&emgFPSClock);
   SimpleBLEPeripheral_freeAttRsp(bleNotConnected);
   GAPRole_TerminateConnection();
   meDisableBLEConnect();
@@ -1664,11 +1710,32 @@ uint8_t i;
 uint8_t adcTotalNum;
 uint8_t batteryIsLow;
 static uint16_t workResult;
-static void SimpleBLEPeripheral_performPeriodicTask(void)
-{
+//给EMG留几个采样单元
+uint8_t emgSampleUnit[EMG_SAMPLE_CYCLE_COUNT * 2] = {0};
+//测试用变量：显示哪一个EMGCycleCount
+uint8_t displayEMGUnit = 0;
+extern uint8_t *getEmgSampleUnit(void){
+  return emgSampleUnit;
+}
+static void SimpleBLEPeripheral_performEMGTask(void){
+  if(emgCycleCount < EMG_SAMPLE_CYCLE_COUNT){
+    emgCycleCount += 1;
+    emgCount += FPS_STATUS_MODE;
+    Util_startClock(&emgGetClock);
+  }else{
+    emgCycleCount = 0;
+    fpsCount += FPS_STATUS_MODE;
+    Util_startClock(&emgLastGetClock);
+  }
+  adcValue0Result = getADCData();
+  uint16_t adcHigh = (adcValue0Result >> 8);
+  uint16_t adcLow = (adcValue0Result % 256);
+  emgSampleUnit[emgCycleCount * 2] = (uint8_t)adcHigh;
+  emgSampleUnit[emgCycleCount * 2 + 1] = (uint8_t)adcLow;
+}
+static void SimpleBLEPeripheral_performPeriodicTask(void){
 #ifndef FEATURE_OAD_ONCHIP
   workResult = 0;
-  
   long adcSigma;
   workStatus = WORKING_STATUS_OK; // <-- 工作状态：0为正常
   
@@ -1684,67 +1751,129 @@ static void SimpleBLEPeripheral_performPeriodicTask(void)
     }
   }
   
-  //蓝牙循环计数，直到计数器满了才执行下一个计算
-  if(DISABLE_MPL > 0){
-    //屏蔽Motion的运算环节？
-    adcServiceGo = 1;
-  }
-  
   //判定系统工况
   workLevel = getSYSTEMWorkLevel();
   if(workLevel < SYSTEM_ENERGY_LEVEL2){
-    //系统工况不足2级，就只空发数据而不进行运算
     if(workStatus == WORKING_STATUS_OK){
       workStatus = WORKING_STATUS_WAIT_FOR_TAP;
     }else if(workStatus == WORKING_STATUS_REQUEST_DISCONNECT){
       workStatus = WORKING_STATUS_DECLINE_CONNECTION;
     }
-    if((adcServiceGo % 2) != 0){
-      //肌电空发数据
-      if(isCharging(0) > 0){
-        //充电中：持续使用充电灯光
-        if(isChargeCompleted() > 0){
-          pinGLightConst();
+    //在EMG取样Cycle中什么也不做，只空跑
+    //if(emgCycleCount <= EMG_SAMPLE_CYCLE_COUNT){
+      //emgSampleUnit[emgCycleCount * 2] = 0;
+      //emgSampleUnit[emgCycleCount * 2 + 1] = 0;
+      //emgCycleCount += 1;
+    //}else{
+      emgCycleCount = 0;
+      //根据采样种类判定应该给EMG发送数据还是给Motion发送数据
+      if((adcServiceGo % 2) != 0){
+        //肌电空发数据
+        if(isCharging(0) > 0){
+          //充电中：持续使用充电灯光
+          if(isChargeCompleted() > 0){
+            pinGLightConst();
+          }else{
+            pinRLightConst();
+          }
         }else{
-          pinRLightConst();
+          //不在充电中：电池足够就亮灯，否则不亮
+          if(workStatus == WORKING_STATUS_WAIT_FOR_TAP){
+            setLEDWorkBlink(workLevel);
+          }else{
+            pinDark(1);
+          }
+        }
+        adcTempResult = 0;
+        //将工作状态合并到adcTempResult的最高4位
+        workResult = workStatus;
+        adcTempResult += (workResult << 12);
+        //心跳机制计数+1
+        heartBeatCount += ENABLE_HEARTBEAT;
+        if(heartBeatCount >= HEARTBEAT_MAX_INTERVAL){
+          //若心跳机制计数达到上限则需采取措施
+          heartBeatCount = HEARTBEAT_MAX_INTERVAL;
+          if(ENABLE_AUTO_DISCONNECT_BY_HEARTBEAT > 0){
+            forceStopBLE();
+          }
+        }
+        SimpleProfile_SetParameter(SIMPLEPROFILE_CHAR4, sizeof(uint16_t), &adcTempResult);
+        adcServiceGo += 1;
+        if(adcServiceGo >= 4){
+          adcServiceGo = 0;
         }
       }else{
-        //不在充电中：电池足够就亮灯，否则不亮
-        if(workStatus == WORKING_STATUS_WAIT_FOR_TAP){
-          setLEDWorkBlink(workLevel);
-        }else{
-          pinDark(1);
-        }
+        //陀螺仪空发数据
+        XYZEuler_SetParameter(XYZ_EULER_CHAR4, sizeof(uint8_t), &adcServiceGo);
+        adcServiceGo += 1;
       }
-      adcTempResult = 0;
-      //将工作状态合并到adcTempResult的最高4位
-      workResult = workStatus;
-      adcTempResult += (workResult << 12);
-      //心跳机制计数+1
-      heartBeatCount += ENABLE_HEARTBEAT;
-      if(heartBeatCount >= HEARTBEAT_MAX_INTERVAL){
-        //若心跳机制计数达到上限则需采取措施
-        heartBeatCount = HEARTBEAT_MAX_INTERVAL;
-        if(ENABLE_AUTO_DISCONNECT_BY_HEARTBEAT > 0){
-          forceStopBLE();
-        }
+      //如果发现了连接信号，则在下回进入该方法时，切换到2级状态
+      if(enableConnectBLE > 0){
+        enableConnectBLE = 0;
+        setSYSTEMWorkLevel(SYSTEM_ENERGY_LEVEL2);
       }
-      SimpleProfile_SetParameter(SIMPLEPROFILE_CHAR4, sizeof(uint16_t), &adcTempResult);
-      adcServiceGo += 1;
+    //}
+    //emgCount = 0;
+    //fpsCount = 0;
+    return;
+  }
+  
+  //在EMG取样Cycle中什么也不做，只采样
+  /*
+  if(emgCycleCount < EMG_SAMPLE_CYCLE_COUNT){
+    adcValue0Result = getADCData();
+    uint16_t adcHigh = (adcValue0Result >> 8);
+    uint16_t adcLow = (adcValue0Result % 256);
+    //uint16_t adcHigh = 1;
+    //uint16_t adcLow = emgCycleCount;
+    //uint16_t adcHigh = (emgCount_OUT >> 8);
+    //uint16_t adcLow = (emgCount_OUT % 256);
+    emgSampleUnit[emgCycleCount * 2] = (uint8_t)adcHigh;
+    emgSampleUnit[emgCycleCount * 2 + 1] = (uint8_t)adcLow;
+    emgCycleCount += 1;
+    //emgCount += 1;
+    return;
+  }else{
+    //fpsCount += 1;
+    emgCycleCount = 0;
+  }
+  */
+  
+  //心跳机制计数+1
+  heartBeatCount += ENABLE_HEARTBEAT;
+  if(heartBeatCount >= HEARTBEAT_MAX_INTERVAL){
+    //若心跳机制计数达到上限则需采取措施
+    heartBeatCount = HEARTBEAT_MAX_INTERVAL;
+    if(ENABLE_AUTO_DISCONNECT_BY_HEARTBEAT > 0){
+      forceStopBLE();
+    }
+  }
+  
+  //系统工作够2级工况：判断是EMG打开，还是Motion打开，还是全打开
+  if(workLevel == SYSTEM_ENERGY_LEVEL2){
+    //EMG关闭
+    if(getMotionOpen()){
+      //Motion打开
+      adcServiceGo += 2; // <-- 只去Motion发送环节
       if(adcServiceGo >= 4){
         adcServiceGo = 0;
       }
     }else{
-      //陀螺仪空发数据
-      XYZEuler_SetParameter(XYZ_EULER_CHAR4, sizeof(uint8_t), &adcServiceGo);
-      adcServiceGo += 1;
+      //Motion关闭
+      adcServiceGo = 1; // <-- 只去EMG发送环节
     }
-    //如果发现了连接信号，则在下回进入该方法时，切换到2级状态
-    if(enableConnectBLE > 0){
-      enableConnectBLE = 0;
-      setSYSTEMWorkLevel(SYSTEM_ENERGY_LEVEL2);
+  }else{
+    //EMG打开
+    if(getMotionOpen()){
+      //Motion打开
+      adcServiceGo += 1; // <-- Motion和EMG交替发送
+      if(adcServiceGo >= 4){
+        adcServiceGo = 0;
+      }
+    }else{
+      //Motion关闭
+      adcServiceGo = 1; // <-- 只去EMG发送环节
     }
-    return;
   }
   
   //肌电和陀螺仪交替处理(只有工作状态至少正2级以上才会进入这个方法)
@@ -1764,11 +1893,19 @@ static void SimpleBLEPeripheral_performPeriodicTask(void)
         //系统设定被启动了
         setSYSTEMWorkLevel(SYSTEM_ENERGY_LEVEL3);
       }
+      //将工作状态合并到adcTempResult的最高4位
+      workResult = workStatus;
+      adcTempResult += (workResult << 12);
+      SimpleProfile_SetParameter(SIMPLEPROFILE_CHAR4, sizeof(uint16_t), &adcTempResult);
       break;
     case SYSTEM_ENERGY_LEVEL3:
       //蓝牙持续循环的同时，执行EMG的读取分析工作
-      adcValue0Result = getADCData();
+      //adcValue0Result = getADCData();
+      uint8_t *adcAddress = getEmgSampleUnit();
+      //adcValue0Result = *(adcAddress + displayEMGUnit * 2 + 1);
+      //adcValue0Result += *(adcAddress + displayEMGUnit * 2) * 256;
       //ADC打开成功且转换成功：这里计算ADC平滑后的数值
+      /*
       if(getEMGSmooth() > 0){
         adcTotalNum = getEmgSmoPowByCalc();
         adcSamples[adcStackPointer] = adcValue0Result;
@@ -1787,47 +1924,35 @@ static void SimpleBLEPeripheral_performPeriodicTask(void)
         //不启用平滑：直接赋值
         adcTempResult = adcValue0Result;
       }
+      */
+      
+      //将工作状态合并到数组中第一个adcTempResult的最高4位
+      workResult = workStatus;
+      emgSampleUnit[0] += (workResult << 4);
       if(getEMGOpen() == 0){
         //系统设定被关闭了
         setSYSTEMWorkLevel(SYSTEM_ENERGY_LEVEL2);
       }
+      SimpleProfile_SetParameter(SIMPLEPROFILE_CHAR4, EMG_SAMPLE_CYCLE_COUNT * 2, adcAddress);
       break;
     default:
       //不正确的工况：肌电数值恒定为0，并且不执行EMG采集工作
       adcTempResult = 0;
+      //将工作状态合并到adcTempResult的最高4位
+      workResult = workStatus;
+      adcTempResult += (workResult << 12);
+      SimpleProfile_SetParameter(SIMPLEPROFILE_CHAR4, sizeof(uint16_t), &adcTempResult);
       break;
     }
-    //顺序轮换
-    adcServiceGo += 1;
-    if(adcServiceGo >= 4){
-      adcServiceGo = 0;
-    }
-    //将工作状态合并到adcTempResult的最高4位
-    workResult = workStatus;
-    adcTempResult += (workResult << 12);
-    //心跳机制计数+1
-    heartBeatCount += ENABLE_HEARTBEAT;
-    if(heartBeatCount >= HEARTBEAT_MAX_INTERVAL){
-      //若心跳机制计数达到上限则需采取措施
-      heartBeatCount = HEARTBEAT_MAX_INTERVAL;
-      if(ENABLE_AUTO_DISCONNECT_BY_HEARTBEAT > 0){
-        forceStopBLE();
-      }
-    }
-    //数据传输
-    SimpleProfile_SetParameter(SIMPLEPROFILE_CHAR4, sizeof(uint16_t), &adcTempResult);
   }else{
     //轮到陀螺仪处理
     if(getMotionOpen() == 1){
       //蓝牙持续循环的同时，执行dmp的读取分析工作
       mplTaskAtMainLoop();
     }
-    //顺序轮换
-    adcServiceGo += 1;
     //陀螺仪信号的处理（伪处理，必须是某个值变化了才通知用户）
     XYZEuler_SetParameter(XYZ_EULER_CHAR4, sizeof(uint8_t), &adcServiceGo);
   }
-  
 #endif //!FEATURE_OAD_ONCHIP
 }
 
@@ -1884,7 +2009,8 @@ static void SimpleBLEPeripheral_clockHandler(UArg arg)
 {
   // Wake up the application.
   // 这里是处理程序循环运行的关键，解锁Event_Pend
-  Event_post(syncEvent, arg);
+  //Event_post(syncEvent, arg);
+  SimpleBLEPeripheral_performEMGTask();
 }
 static void SimpleBLEPeripheral_initializeHandler(UArg arg)
 {
@@ -1895,6 +2021,25 @@ static void SimpleBLEPeripheral_advertiseHandler(UArg arg)
 {
   //进入1级工况，继续下一轮的Advertising
   setSYSTEMWorkLevel(SYSTEM_ENERGY_LEVEL1);
+}
+static void SimpleBLEPeripheral_emgHandler(UArg arg)
+{
+  SimpleBLEPeripheral_performEMGTask();
+}
+static void SimpleBLEPeripheral_emgLastHandler(UArg arg)
+{
+  Event_post(syncEvent, arg);
+}
+static void SimpleBLEPeripheral_emgFPSHandler(UArg arg)
+{
+  //统计EMG和FPS并存入输出对象
+  emgCount_OUT = emgCount;
+  emgCount = 0;
+
+  fpsCount_OUT = fpsCount;
+  fpsCount = 0;
+  
+  Util_startClock(&emgFPSClock);
 }
 
 /*********************************************************************

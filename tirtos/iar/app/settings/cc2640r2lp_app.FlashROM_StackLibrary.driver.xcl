@@ -6,7 +6,7 @@
 
 "-p" 
 
-"D:\IAR811\IAR811\arm\CONFIG\debugger\TexasInstruments\CC2640R2F.ddf" 
+"D:\IAR811\arm\CONFIG\debugger\TexasInstruments\CC2640R2F.ddf" 
 
 "--semihosting=none" 
 
@@ -22,7 +22,7 @@
 
 "--drv_interface=CJTAG" 
 
-"--xds_board_file=D:\IAR811\IAR811\arm\config\debugger\TexasInstruments\xds\CC2650_XDS110_CJTAG.dat" 
+"--xds_board_file=D:\IAR811\arm\config\debugger\TexasInstruments\xds\CC2650_XDS110_CJTAG.dat" 
 
 
 

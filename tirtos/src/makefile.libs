@@ -1,6 +1,6 @@
 #
 # This file was generated based on the configuration script:
-#     C:\ti\simplelink_cc2640r2_sdk_1_50_00_58\examples\rtos\CC2640R2_LAUNCHXL\blestack\simple_peripheral_healer\tirtos\app_ble.cfg
+#     C:\ti\simplelink_cc2640r2_sdk_1_50_00_58\examples\rtos\CC2640R2_LAUNCHXL\blestack\simple_peripheral\tirtos\app_ble.cfg
 #
 # This makefile may be included in other makefiles that need to build
 # the libraries containing the compiled source files generated as
@@ -14,7 +14,7 @@
 #
 # The absolute path to the generated source directory (at the time the
 # sources were generated) is:
-#    C:\ti\simplelink_cc2640r2_sdk_1_50_00_58\examples\rtos\CC2640R2_LAUNCHXL\blestack\simple_peripheral_healer\tirtos\src
+#    C:\ti\simplelink_cc2640r2_sdk_1_50_00_58\examples\rtos\CC2640R2_LAUNCHXL\blestack\simple_peripheral\tirtos\src
 #
 GEN_SRC_DIR ?= ../../src
 

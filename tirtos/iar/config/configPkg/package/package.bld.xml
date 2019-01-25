@@ -7,7 +7,7 @@
         <srcFile name="package/cfg/app_ble_prm3.c"/>
     </sources>
     <configscripts>
-        <srcFile name="C:/ti/simplelink_cc2640r2_sdk_1_50_00_58/examples/rtos/CC2640R2_LAUNCHXL/blestack/simple_peripheral_healer/tirtos/app_ble.cfg"/>
+        <srcFile name="C:/ti/simplelink_cc2640r2_sdk_1_50_00_58/examples/rtos/CC2640R2_LAUNCHXL/blestack/simple_peripheral/tirtos/app_ble.cfg"/>
     </configscripts>
     <makefiles>
         <srcFile name="package.mak" src="package.bld"/>
@@ -25,7 +25,7 @@
             platform="ti.platforms.tiva:TM4C1294NCPDT:1"
             isa="v7M"
             suffix="rm3"
-            rootDir="D:/IAR811/IAR811/arm"
+            rootDir="D:/IAR811/arm"
             os="undefined"
             rts="iar.targets.arm.rts">
             <model endian="little"
@@ -44,7 +44,7 @@
         isPartial="false"
         xCfgScript="package/cfg/app_ble_prm3.cfg"
         xCfgPrefix="package/cfg/app_ble_prm3"
-        cfgScript="C:/ti/simplelink_cc2640r2_sdk_1_50_00_58/examples/rtos/CC2640R2_LAUNCHXL/blestack/simple_peripheral_healer/tirtos/app_ble.cfg"
+        cfgScript="C:/ti/simplelink_cc2640r2_sdk_1_50_00_58/examples/rtos/CC2640R2_LAUNCHXL/blestack/simple_peripheral/tirtos/app_ble.cfg"
         cfgArgs="NO_ROM%253D0"
         />
     </configurations>
@@ -56,7 +56,7 @@
         profile="release"
         xCfgScript="package/cfg/app_ble_prm3.cfg"
         xCfgPrefix="package/cfg/app_ble_prm3"
-        cfgScript="C:/ti/simplelink_cc2640r2_sdk_1_50_00_58/examples/rtos/CC2640R2_LAUNCHXL/blestack/simple_peripheral_healer/tirtos/app_ble.cfg"
+        cfgScript="C:/ti/simplelink_cc2640r2_sdk_1_50_00_58/examples/rtos/CC2640R2_LAUNCHXL/blestack/simple_peripheral/tirtos/app_ble.cfg"
         cfgArgs="NO_ROM%253D0"
         />
     </executables>

@@ -17,6 +17,9 @@ xlsfile = "serials.xlsx"
 sourcefile = "app/main.h"
 tmpfile = "main.h"
 sequencefile = "Sequence.txt"
+devinfofile = "profile/devinfoservice.c"
+devtmpfile = "devinfoservice.c"
+versionfile = "Version.txt"
 outputfile = "../tirtos/iar/app/FlashROM_StackLibrary/Exe/cc2640r2lp_app.bin"
 
 sn = open(snfile, 'r')
@@ -80,10 +83,8 @@ for serialNumber in sn:
     
     for c in serialNumber:
         serialNumberHex += hex(ord(c)) + ', '
-    serialNumberHex = serialNumberHex[0:len(serialNumberHex) - 2]
     
-    #for c in serialNumber:
-        #serialNumberHex += c
+    serialNumberHex = serialNumberHex[0:len(serialNumberHex) - 2]
     
     source = open(sourcefile, 'r')
     tmp = open(tmpfile, 'w')
@@ -96,9 +97,32 @@ for serialNumber in sn:
     source.close()
     tmp.close()
     
+    source = open(devinfofile, 'r')
+    tmp = open(devtmpfile, 'w')
+    version = open(versionfile, 'r')
+    
+    hardware_version = version.readline()
+    hardware_version = hardware_version.replace('\n', '')
+    software_version = version.readline()
+    software_version = software_version.replace('\n', '')
+    
+    for line in source:
+        if line.startswith('static uint8 devInfoSerialNumber[DEVINFO_STR_ATTR_LEN+1] = '):
+            line = 'static uint8 devInfoSerialNumber[DEVINFO_STR_ATTR_LEN+1] = \"' + serialNumber + '\";\n'
+        if line.startswith('static uint8 devInfoHardwareRev[DEVINFO_STR_ATTR_LEN+1] = '):
+            line = 'static uint8 devInfoHardwareRev[DEVINFO_STR_ATTR_LEN+1] = \"' + hardware_version + '\";\n'
+        if line.startswith('static uint8 devInfoSoftwareRev[DEVINFO_STR_ATTR_LEN+1] = '):
+            line = 'static uint8 devInfoSoftwareRev[DEVINFO_STR_ATTR_LEN+1] = \"' + software_version + '\";\n'
+        tmp.write(line)
+    
+    source.close()
+    tmp.close()
+    version.close()
+    
     renamefile = outputfilecase + "/FlexRII_" + '{0:05}'.format(i) + "_" + serialNumber + ".bin"
     
     os.system("move /y " + tmpfile + " " + sourcefile)
+    os.system("move /y " + devtmpfile + " " + devinfofile)
     os.system("D:/IAR811/common/bin/IarBuild.exe ../tirtos/iar/app/cc2640r2lp_app.ewp -build * -varfile ../tirtos/iar/simple_peripheral.custom_argvars")
     shutil.copy(outputfile, renamefile)
     toGo -= 1

@@ -233,7 +233,7 @@ uint16_t getSmoothedEMGData(void){
 uint16_t getBatteryData(void){
   //ADC采集区的数据头尾
   adcTempResult = scifTaskData.muscleBattery.output.batteryValue;
-  return adcTempResult;
+  return adcTempResult * 2;
 }
 
 //功耗相关

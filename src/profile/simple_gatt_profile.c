@@ -183,7 +183,7 @@ static uint8 simpleProfileChar3UserDesp[17] = "Char 3 - Write F";
 static uint8 simpleProfileChar4Props = GATT_PROP_NOTIFY;
 
 // Characteristic 4 Value
-static uint8 simpleProfileChar4 = 0;
+static uint8 simpleProfileChar4[EMG_SAMPLE_CYCLE_COUNT * 2] = {0};
 
 // Simple Profile Characteristic 4 Configuration Each client has its own
 // instantiation of the Client Characteristic Configuration. Reads of the
@@ -311,7 +311,7 @@ static gattAttribute_t simpleProfileAttrTbl[SERVAPP_NUM_ATTR_SUPPORTED] =
         { TI_UUID_SIZE, simpleProfilechar4UUID },
         0, 
         0, 
-        &simpleProfileChar4 
+        simpleProfileChar4 
       },
 
       // Characteristic 4 configuration
@@ -489,11 +489,23 @@ bStatus_t SimpleProfile_SetParameter( uint8 param, uint8 len, void *value )
     case SIMPLEPROFILE_CHAR4:
       if( len == sizeof ( uint16 ) )
       {
-        uint16_t tempValue = *((uint16*)value);
-        simpleProfileChar4 = (tempValue >> 8);
-        simpleProfileChar6 = (tempValue % 256);
+        // v1.0.0.3以前使用这个版本
+        uint16_t tempValue = *((uint16_t *)value);
+        simpleProfileChar4[0] = (tempValue >> 8);
+        simpleProfileChar4[1] = (tempValue % 256);
         // See if Notification has been enabled(即通知CallBack去)
-        GATTServApp_ProcessCharCfg( simpleProfileChar4Config, &simpleProfileChar4, FALSE,
+        GATTServApp_ProcessCharCfg( simpleProfileChar4Config, simpleProfileChar4, FALSE,
+                                    simpleProfileAttrTbl, GATT_NUM_ATTRS( simpleProfileAttrTbl ),
+                                    INVALID_TASK_ID, simpleProfile_ReadAttrCB );
+      }
+      else if(len == EMG_SAMPLE_CYCLE_COUNT * 2)
+      {
+        // v1.1.0.1以后使用这个版本
+        uint8_t *tempValue = (uint8_t *)value;
+        for(int i = 0; i < len; i++){
+          simpleProfileChar4[i] = *(tempValue + i);
+        }
+        GATTServApp_ProcessCharCfg( simpleProfileChar4Config, simpleProfileChar4, FALSE,
                                     simpleProfileAttrTbl, GATT_NUM_ATTRS( simpleProfileAttrTbl ),
                                     INVALID_TASK_ID, simpleProfile_ReadAttrCB );
       }
@@ -542,7 +554,7 @@ bStatus_t SimpleProfile_GetParameter( uint8 param, void *value )
       break;  
 
     case SIMPLEPROFILE_CHAR4:
-      *((uint8*)value) = simpleProfileChar4;
+      *((uint8*)value) = simpleProfileChar4[0];
       break;
     
     default:
@@ -611,10 +623,18 @@ static bStatus_t simpleProfile_ReadAttrCB(uint16_t connHandle,
         pValue[0] = *pAttr->pValue;
         break;
       case SIMPLEPROFILE_CHAR4_UUID:
-        *pLen = 2;
         //VOID memcpy( pValue, pAttr->pValue, 2 );
-        pValue[0] = simpleProfileChar4;
-        pValue[1] = simpleProfileChar6;
+        //*pLen = 2;
+        //pValue[0] = simpleProfileChar4;
+        //pValue[1] = simpleProfileChar6;
+        
+        //修改后要输出 EMG_SAMPLE_CYCLE_COUNT * 2 个字节
+        *pLen = EMG_SAMPLE_CYCLE_COUNT * 2;
+        //for(int i = 0; i < *pLen; i++){
+          //pValue[i] = 16;
+        //}
+        VOID memcpy( pValue, pAttr->pValue, *pLen );
+        
         break;
       default:
         // Should never get here! (characteristics 3 and 4 do not have read permissions)

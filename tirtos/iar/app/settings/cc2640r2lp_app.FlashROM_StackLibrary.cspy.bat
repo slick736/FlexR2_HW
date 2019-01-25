@@ -25,7 +25,7 @@ if not "%~1" == "" goto debugFile
 
 @echo on 
 
-"D:\IAR811\IAR811\common\bin\cspybat" -f "C:\ti\simplelink_cc2640r2_sdk_1_50_00_58\examples\rtos\CC2640R2_LAUNCHXL\blestack\simple_peripheral_healer\tirtos\iar\app\settings\cc2640r2lp_app.FlashROM_StackLibrary.general.xcl" --backend -f "C:\ti\simplelink_cc2640r2_sdk_1_50_00_58\examples\rtos\CC2640R2_LAUNCHXL\blestack\simple_peripheral_healer\tirtos\iar\app\settings\cc2640r2lp_app.FlashROM_StackLibrary.driver.xcl" 
+"D:\IAR811\common\bin\cspybat" -f "C:\ti\simplelink_cc2640r2_sdk_1_50_00_58\examples\rtos\CC2640R2_LAUNCHXL\blestack\simple_peripheral\tirtos\iar\app\settings\cc2640r2lp_app.FlashROM_StackLibrary.general.xcl" --backend -f "C:\ti\simplelink_cc2640r2_sdk_1_50_00_58\examples\rtos\CC2640R2_LAUNCHXL\blestack\simple_peripheral\tirtos\iar\app\settings\cc2640r2lp_app.FlashROM_StackLibrary.driver.xcl" 
 
 @echo off 
 goto end 
@@ -34,7 +34,7 @@ goto end
 
 @echo on 
 
-"D:\IAR811\IAR811\common\bin\cspybat" -f "C:\ti\simplelink_cc2640r2_sdk_1_50_00_58\examples\rtos\CC2640R2_LAUNCHXL\blestack\simple_peripheral_healer\tirtos\iar\app\settings\cc2640r2lp_app.FlashROM_StackLibrary.general.xcl" "--debug_file=%~1" --backend -f "C:\ti\simplelink_cc2640r2_sdk_1_50_00_58\examples\rtos\CC2640R2_LAUNCHXL\blestack\simple_peripheral_healer\tirtos\iar\app\settings\cc2640r2lp_app.FlashROM_StackLibrary.driver.xcl" 
+"D:\IAR811\common\bin\cspybat" -f "C:\ti\simplelink_cc2640r2_sdk_1_50_00_58\examples\rtos\CC2640R2_LAUNCHXL\blestack\simple_peripheral\tirtos\iar\app\settings\cc2640r2lp_app.FlashROM_StackLibrary.general.xcl" "--debug_file=%~1" --backend -f "C:\ti\simplelink_cc2640r2_sdk_1_50_00_58\examples\rtos\CC2640R2_LAUNCHXL\blestack\simple_peripheral\tirtos\iar\app\settings\cc2640r2lp_app.FlashROM_StackLibrary.driver.xcl" 
 
 @echo off 
 :end

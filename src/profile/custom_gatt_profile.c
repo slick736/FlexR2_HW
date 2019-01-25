@@ -604,6 +604,7 @@ static bStatus_t customProfile_ReadAttrCB(uint16_t connHandle,
       case CUSTOMPROFILE_CHAR1_UUID:
         //先读取系统设定
         tempSystemOpt = getSystemOption();
+        //tempSystemOpt = getFPSCount_OUT();
         //0为高，1为低
         customProfileChar1[0] = (tempSystemOpt >> 8);
         customProfileChar1[1] = (tempSystemOpt % 256);
@@ -645,7 +646,11 @@ static bStatus_t customProfile_ReadAttrCB(uint16_t connHandle,
         */
         
         //前2字节：电源电压
-        adcTempResult = getBatteryData();
+        if(FPS_STATUS_MODE){
+          adcTempResult = getEMGCount_OUT(); // <-- 先暂时改为FPS
+        }else{
+          adcTempResult = getBatteryData();
+        }
         customProfileChar2[0] = (adcTempResult >> 8);
         customProfileChar2[1] = (adcTempResult % 256);
         
@@ -658,8 +663,13 @@ static bStatus_t customProfile_ReadAttrCB(uint16_t connHandle,
         customProfileChar2[2] = (getWorkStatus() << 4);
         customProfileChar2[2] += VERSION_INFO;
         
-        //第4字节：暂时显示为心跳机制计数
-        customProfileChar2[3] = getHeartBeatCount();
+        if(FPS_STATUS_MODE){
+          //第4字节：暂时显示为FPS
+          customProfileChar2[3] = getFPSCount_OUT();
+        }else{
+          //第4字节：暂时显示为心跳机制计数
+          customProfileChar2[3] = getHeartBeatCount();
+        }
         
         //后2字节：暂时未用
         //customProfileChar2[4] = 0;

@@ -6,7 +6,7 @@ XOPTS = -I"C:/ti/xdctools_3_50_03_33_core/packages/" -I"C:/ti/xdctools_3_50_03_3
 vpath % C:/ti/simplelink_cc2640r2_sdk_1_50_00_58/kernel/tirtos/packages/ti/sysbios/
 vpath %.c C:/ti/xdctools_3_50_03_33_core/packages/
 
-CCOPTS    = --aeabi --cpu=Cortex-M3 --diag_suppress=Pa050,Go005 --endian=little -e --thumb --silent  --mfc -Ohz  -Dti_sysbios_knl_Task_minimizeLatency__D=FALSE -Dti_sysbios_family_arm_cc26xx_Boot_driverlibVersion=2 -Dti_sysbios_knl_Clock_stopCheckNext__D=TRUE -Dti_sysbios_family_arm_m3_Hwi_enableException__D=TRUE -Dti_sysbios_family_arm_m3_Hwi_disablePriority__D=32U -Dti_sysbios_family_arm_m3_Hwi_numSparseInterrupts__D=0U  --dlib_config D:/IAR811/IAR811/arm/inc/c/DLib_Config_Normal.h
+CCOPTS    = --aeabi --cpu=Cortex-M3 --diag_suppress=Pa050,Go005 --endian=little -e --thumb --silent  --mfc -Ohz  -Dti_sysbios_knl_Task_minimizeLatency__D=FALSE -Dti_sysbios_family_arm_cc26xx_Boot_driverlibVersion=2 -Dti_sysbios_knl_Clock_stopCheckNext__D=TRUE -Dti_sysbios_family_arm_m3_Hwi_enableException__D=TRUE -Dti_sysbios_family_arm_m3_Hwi_disablePriority__D=32U -Dti_sysbios_family_arm_m3_Hwi_numSparseInterrupts__D=0U  --dlib_config D:/IAR811/arm/inc/c/DLib_Config_Normal.h
 
 XDC_ROOT  = C:/ti/xdctools_3_50_03_33_core/packages/
 
@@ -22,13 +22,13 @@ BIOS_INC  = -I"C:/ti/simplelink_cc2640r2_sdk_1_50_00_58/kernel/tirtos/packages/"
 
 INCS = $(BIOS_INC) -I"C:/ti/simplelink_cc2640r2_sdk_1_50_00_58/kernel/tirtos/packages/" -I"C:/ti/simplelink_cc2640r2_sdk_1_50_00_58/source/" -I"C:/ti/simplelink_cc2640r2_sdk_1_50_00_58/source/ti/blestack/" -I"C:/ti/xdctools_3_50_03_33_core/packages/" -I"../" -I"/packages//" 
 
-CC = LC_ALL=C  D:/IAR811/IAR811/arm/bin/iccarm $(CCOPTS)
-ASM = LC_ALL=C  D:/IAR811/IAR811/arm/bin/iasmarm --cpu Cortex-M3 --endian little -S
-AR = LC_ALL=C  D:/IAR811/IAR811/arm/bin/iarchive 
+CC = LC_ALL=C  D:/IAR811/arm/bin/iccarm $(CCOPTS)
+ASM = LC_ALL=C  D:/IAR811/arm/bin/iasmarm --cpu Cortex-M3 --endian little -S
+AR = LC_ALL=C  D:/IAR811/arm/bin/iarchive 
 
-CC_LIB = D:/IAR811/IAR811/arm/bin/iccarm --aeabi --cpu=Cortex-M3 --diag_suppress=Pa050,Go005 --endian=little -e --thumb --silent  --mfc -Ohz  -Dti_sysbios_knl_Task_minimizeLatency__D=FALSE -Dti_sysbios_family_arm_cc26xx_Boot_driverlibVersion=2 -Dti_sysbios_knl_Clock_stopCheckNext__D=TRUE -Dti_sysbios_family_arm_m3_Hwi_enableException__D=TRUE -Dti_sysbios_family_arm_m3_Hwi_disablePriority__D=32U -Dti_sysbios_family_arm_m3_Hwi_numSparseInterrupts__D=0U -I D:/IAR811/IAR811/arm/include
+CC_LIB = D:/IAR811/arm/bin/iccarm --aeabi --cpu=Cortex-M3 --diag_suppress=Pa050,Go005 --endian=little -e --thumb --silent  --mfc -Ohz  -Dti_sysbios_knl_Task_minimizeLatency__D=FALSE -Dti_sysbios_family_arm_cc26xx_Boot_driverlibVersion=2 -Dti_sysbios_knl_Clock_stopCheckNext__D=TRUE -Dti_sysbios_family_arm_m3_Hwi_enableException__D=TRUE -Dti_sysbios_family_arm_m3_Hwi_disablePriority__D=32U -Dti_sysbios_family_arm_m3_Hwi_numSparseInterrupts__D=0U -I D:/IAR811/arm/include
 
-CC_PP = D:/IAR811/IAR811/arm/bin/iccarm --aeabi --cpu=Cortex-M3 --diag_suppress=Pa050,Go005 --endian=little -e --thumb --silent  --mfc   -Dti_sysbios_knl_Task_minimizeLatency__D=FALSE -Dti_sysbios_family_arm_cc26xx_Boot_driverlibVersion=2 -Dti_sysbios_knl_Clock_stopCheckNext__D=TRUE -Dti_sysbios_family_arm_m3_Hwi_enableException__D=TRUE  -Dti_sysbios_family_arm_m3_Hwi_numSparseInterrupts__D=0U -I D:/IAR811/IAR811/arm/include  --dlib_config D:/IAR811/IAR811/arm/inc/c/DLib_Config_Normal.h
+CC_PP = D:/IAR811/arm/bin/iccarm --aeabi --cpu=Cortex-M3 --diag_suppress=Pa050,Go005 --endian=little -e --thumb --silent  --mfc   -Dti_sysbios_knl_Task_minimizeLatency__D=FALSE -Dti_sysbios_family_arm_cc26xx_Boot_driverlibVersion=2 -Dti_sysbios_knl_Clock_stopCheckNext__D=TRUE -Dti_sysbios_family_arm_m3_Hwi_enableException__D=TRUE  -Dti_sysbios_family_arm_m3_Hwi_numSparseInterrupts__D=0U -I D:/IAR811/arm/include  --dlib_config D:/IAR811/arm/inc/c/DLib_Config_Normal.h
 
 DEL = C:/ti/xdctools_3_50_03_33_core/packages/../bin/rm -f
 CP = C:/ti/xdctools_3_50_03_33_core/packages/../bin/cp -f

@@ -11,7 +11,7 @@
 #define WORKING_STATUS_DECLINE_CONNECTION    9
 #define WORKING_STATUS_REQUEST_DISCONNECT    15
 
-#define HEALEREMG_SERIAL_NUMBER    0x46, 0x52, 0x31, 0x38, 0x30, 0x35, 0x32, 0x37, 0x30, 0x31, 0x32, 0x30, 0x30, 0x30, 0x30, 0x30, 0x33
+#define HEALEREMG_SERIAL_NUMBER    0x46, 0x52, 0x31, 0x38, 0x31, 0x32, 0x30, 0x32, 0x30, 0x31, 0x37, 0x30, 0x30, 0x30, 0x31, 0x30, 0x32
 
 #define LOW_RX                  0
 #define HIGH_RX                 1
@@ -42,10 +42,12 @@
 #define AXIS_9_FUSION_MODE      1
 
 //开机时默认数值的设置
-#define DEFAULT_EMG_FREQ        20
+#define DEFAULT_EMG_FREQ        1024 // <-- 原 20
 #define DEFAULT_MOTION_FREQ     20
 #define DEFAULT_OUTPUT_FORMAT   3
 #define EMG_RESET_INTERVAL      500
+
+#define EMG_SAMPLE_CYCLE_COUNT  40 // <-- 多少个EMG采样周期过后，才能发送一次数据
 
 //每多少个蓝牙周期才进行一次运算和采样（成品应为0）
 #define BLE_ACTIVE_INTERVAL     0
@@ -70,14 +72,16 @@
 //连接相关
 #define CONNECT_RETRY_MAX           2 // <-- 拍击后重试多少个0<->1循环周期
 #define PRECONNECT_RETRY_MAX        5 // <-- 拍击前让LED点亮多少个0<->1循环周期
-#define REJECT_CONNECT_ON_LOWBATT   1 // <-- 是否在电池没电时请求挂断并拒绝再次连接（成品应为1）
+#define REJECT_CONNECT_ON_LOWBATT   0 // <-- 是否在电池没电时请求挂断并拒绝再次连接（成品应为1）
 
-#define ENABLE_HEARTBEAT            1 // <-- 启用心跳机制防死机（成品应为1）
-#define ENABLE_AUTO_DISCONNECT_BY_HEARTBEAT 1 // <-- 心跳机制启用时允许硬件自主断开（成品应为1）
+#define ENABLE_HEARTBEAT            0 // <-- 启用心跳机制防死机（成品应为1）
+#define ENABLE_AUTO_DISCONNECT_BY_HEARTBEAT 0 // <-- 心跳机制启用时允许硬件自主断开（成品应为1）
 #define HEARTBEAT_MAX_INTERVAL      200 // <-- 经过多少个EMG周期没有从EEE2通道读取数据就认为断连
                                         // 20 = 1秒，成品应为100
 
 #define VERSION_INFO                1 // <-- 版本信息（本产品为1）
+
+#define FPS_STATUS_MODE             0 // <-- 改用FPS统计模式，取代之前的工作状态和电压输出（成品应为0）
 
 //测试用灯光（成品应为0）
 #define LAMP_TEST_MODE              0
