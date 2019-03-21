@@ -23,9 +23,9 @@ param([String]$debugfile = "");
 
 if ($debugfile -eq "")
 {
-& "D:\IAR811\common\bin\cspybat" -f "C:\ti\simplelink_cc2640r2_sdk_1_50_00_58\examples\rtos\CC2640R2_LAUNCHXL\blestack\simple_peripheral\tirtos\iar\stack\settings\cc2640r2lp_stack.FlashROM_Library.general.xcl" --backend -f "C:\ti\simplelink_cc2640r2_sdk_1_50_00_58\examples\rtos\CC2640R2_LAUNCHXL\blestack\simple_peripheral\tirtos\iar\stack\settings\cc2640r2lp_stack.FlashROM_Library.driver.xcl" 
+& "C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\common\bin\cspybat" -f "C:\ti\simplelink_cc2640r2_sdk_1_50_00_58\examples\rtos\CC2640R2_LAUNCHXL\blestack\simple_peripheral_healer\tirtos\iar\stack\settings\cc2640r2lp_stack.FlashROM_Library.general.xcl" --backend -f "C:\ti\simplelink_cc2640r2_sdk_1_50_00_58\examples\rtos\CC2640R2_LAUNCHXL\blestack\simple_peripheral_healer\tirtos\iar\stack\settings\cc2640r2lp_stack.FlashROM_Library.driver.xcl" 
 }
 else
 {
-& "D:\IAR811\common\bin\cspybat" -f "C:\ti\simplelink_cc2640r2_sdk_1_50_00_58\examples\rtos\CC2640R2_LAUNCHXL\blestack\simple_peripheral\tirtos\iar\stack\settings\cc2640r2lp_stack.FlashROM_Library.general.xcl" --debug_file=$debugfile --backend -f "C:\ti\simplelink_cc2640r2_sdk_1_50_00_58\examples\rtos\CC2640R2_LAUNCHXL\blestack\simple_peripheral\tirtos\iar\stack\settings\cc2640r2lp_stack.FlashROM_Library.driver.xcl" 
+& "C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\common\bin\cspybat" -f "C:\ti\simplelink_cc2640r2_sdk_1_50_00_58\examples\rtos\CC2640R2_LAUNCHXL\blestack\simple_peripheral_healer\tirtos\iar\stack\settings\cc2640r2lp_stack.FlashROM_Library.general.xcl" --debug_file=$debugfile --backend -f "C:\ti\simplelink_cc2640r2_sdk_1_50_00_58\examples\rtos\CC2640R2_LAUNCHXL\blestack\simple_peripheral_healer\tirtos\iar\stack\settings\cc2640r2lp_stack.FlashROM_Library.driver.xcl" 
 }

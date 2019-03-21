@@ -1,12 +1,12 @@
-"D:\IAR811\arm\bin\armproc.dll" 
+"C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\arm\bin\armproc.dll" 
 
-"D:\IAR811\arm\bin\armsim2.dll" 
+"C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\arm\bin\armsim2.dll" 
 
-"C:\ti\simplelink_cc2640r2_sdk_1_50_00_58\examples\rtos\CC2640R2_LAUNCHXL\blestack\simple_peripheral\tirtos\iar\stack\FlashROM_Library\Exe\ble_simple_peripheral_cc2640r2lp_stack_FlashROM_Library.out" 
+"C:\ti\simplelink_cc2640r2_sdk_1_50_00_58\examples\rtos\CC2640R2_LAUNCHXL\blestack\simple_peripheral_healer\tirtos\iar\stack\FlashROM_Library\Exe\ble_simple_peripheral_cc2640r2lp_stack_FlashROM_Library.out" 
 
---plugin "D:\IAR811\arm\bin\armbat.dll" 
+--plugin "C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\arm\bin\armbat.dll" 
 
---device_macro "D:\IAR811\arm\config\debugger\TexasInstruments\CC26x0.dmac" 
+--device_macro "C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\arm\config\debugger\TexasInstruments\CC26x0.dmac" 
 
 
 

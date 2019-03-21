@@ -647,7 +647,12 @@ static bStatus_t customProfile_ReadAttrCB(uint16_t connHandle,
         
         //前2字节：电源电压
         if(FPS_STATUS_MODE){
-          adcTempResult = getEMGCount_OUT(); // <-- 先暂时改为FPS
+          uint8_t workLevel = getSYSTEMWorkLevel();
+          if(workLevel == SYSTEM_ENERGY_LEVEL3_MOTION){
+            adcTempResult = getMotionCount_OUT();
+          }else{
+            adcTempResult = getEMGCount_OUT();
+          }
         }else{
           adcTempResult = getBatteryData();
         }

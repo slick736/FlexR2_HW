@@ -9,6 +9,7 @@ extern void PIN_GLight(void);
 extern void PIN_RLight(void);
 extern void PIN_GDark(void);
 extern void PIN_RDark(void);
+extern void PIN_Both(void);
 
 extern void pinGLightConst(void);
 extern void pinRLightConst(void);

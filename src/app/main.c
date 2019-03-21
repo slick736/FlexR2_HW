@@ -875,6 +875,7 @@ static void setHALReport(uint8_t dataSort){
 }
 
 //改变dmp/mpu运算速率
+///*
 static void setMotionRate(uint8_t motionRate){
   dmp_set_fifo_rate(motionRate);
   inv_set_quat_sample_rate(1000000L / motionRate);
@@ -882,6 +883,7 @@ static void setMotionRate(uint8_t motionRate){
   inv_set_gyro_sample_rate(1000000L / motionRate);
   inv_set_accel_sample_rate(1000000L / motionRate);
 }
+//*/
 
 //原本的gyro_setup是写在输入操作判定区内部的，现在移动到外面来
 /* Handle sensor on/off combinations. */
@@ -948,9 +950,17 @@ static void mpuWakeUp(void){
     return;
   }
   mpuOutOfLPMIM();
-  hal.sensors |= ACCEL_ON;
+  if(AXIS_9_FUSION_MODE){
+    hal.sensors |= COMPASS_ON;
+  }else{
+    hal.sensors &= ~COMPASS_ON;
+  }
+  if(AXIS_3_FUSION_MODE){
+    hal.sensors &= ~ACCEL_ON;
+  }else{
+    hal.sensors |= ACCEL_ON;
+  }
   hal.sensors |= GYRO_ON;
-  hal.sensors |= COMPASS_ON;
   //之前设定了GYRO_ON，此语句自动取消LPA模式
   setup_gyro();
   hal.dmp_on = 1;
@@ -1069,37 +1079,53 @@ static void setSYSTEMWorkLevel_STAT(uint8_t workLevel){
     emgPortOpen(0);
     break;
   case SYSTEM_ENERGY_LEVEL2_LPA:
-    //准2级待连接工作状态
-    motionIsOpen = 0;
+    //准2级待连接工作状态（关闭EMG、Motion）
     enableStandby(0);
+    
+    motionIsOpen = 0;
     if(ENABLE_AUTO_SLEEP == 0){
       mpuHibernate();
       mpuIntoLPA();
     }
+    
     adcOn();
     emgPortOpen(0);
+    
     break;
   case SYSTEM_ENERGY_LEVEL2:
-    //2级工作状态
+    //2级工作状态（关闭EMG、Motion）
     if(LAMP_TEST_MODE > 0){
-      PIN_GLight();
-      PIN_RLight();
+      PIN_Both();
     }
-    motionIsOpen = 0;
+    
     enableStandby(0);
+    
+    motionIsOpen = 0;
     mpuOutOfLPMIM();
     mpuHibernate();
+    
     adcOn();
     emgPortOpen(0);
+    
     break;
-  case SYSTEM_ENERGY_LEVEL3:
-    //3级工作状态
-    //根据动作种类判定Motion模块还是EMG模块打开
-    //目前的2、3级工况判定依据是：EMG或Motion至少有一个模块被打开时为3级工况，否则为2级
-    //setMotionOpen(1);
+  case SYSTEM_ENERGY_LEVEL3_EMG:
+    //3级工作状态（开EMG、关Motion）
     emgPortOpen(1);
     adcOn();
+    
+    motionIsOpen = 0;
+    mpuOutOfLPMIM();
+    mpuHibernate();
+    
     break;
+  case SYSTEM_ENERGY_LEVEL3_MOTION:
+    //3级工作状态（开Motion、关EMG）
+    adcOn();
+    emgPortOpen(0);
+    
+    motionIsOpen = 1;
+    mpuWakeUp();
+    
   default:
     break;
   }
@@ -1614,6 +1640,7 @@ static void enableStandby(uint8_t standbyEnabled){
 }
 
 //更改ADC频率-接口(CCC1)
+/*
 uint8_t emgFreq = DEFAULT_EMG_FREQ;
 void setEMGFreq(uint8_t neoFreq){
   emgFreq = neoFreq;
@@ -1622,19 +1649,22 @@ void setEMGFreq(uint8_t neoFreq){
   //设定完频率后，关闭EMG再重开
   emgPauseToSetting();
 }
+*/
 uint8_t getEMGFreq(void){
-  return emgFreq;
+  return 0;
 }
 
 //更改MPL频率-接口(FFF1)
+
 uint8_t mplFreq = DEFAULT_MOTION_FREQ;
 void setMPLFreq(uint8_t neoFreq){
   mplFreq = neoFreq;
   //不必担心除以0的问题。mplFreq这个参数在该方法被调用时已经事先被处理好
   setMotionRate(mplFreq);
 }
+
 uint8_t getMPLFreq(void){
-  return mplFreq;
+  return 0;
 }
 
 //一次性更改余下所有的系统设定(EEE1)
@@ -1689,10 +1719,10 @@ static void setMotionOpen(uint8_t neoMotion){
   if(motionIsOpen != neoMotion){
     if(neoMotion > 0){
       //打开Motion
-      mpuWakeUp();
+      //mpuWakeUp();
     }else{
       //关闭Motion
-      mpuHibernate();
+      //mpuHibernate();
     }
   }
   motionIsOpen = neoMotion;
@@ -1702,7 +1732,7 @@ uint8_t getMotionOpen(void){
 }
 
 //MPL输出何种格式数据-接口
-static uint8_t mplDataFormat = DEFAULT_OUTPUT_FORMAT; //初始状态下为欧拉角
+static uint8_t mplDataFormat = DEFAULT_OUTPUT_FORMAT; //初始状态下为旋转四元数
 static void setMPLDFormat(uint8_t neoFmt){
   mplDataFormat = neoFmt;
   setHALReport(mplDataFormat);

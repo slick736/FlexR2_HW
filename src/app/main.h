@@ -1,9 +1,10 @@
-#define SYSTEM_ENERGY_LEVEL0         0
-#define SYSTEM_ENERGY_LEVEL1         10
-#define SYSTEM_ENERGY_LEVEL1_LPA     15
-#define SYSTEM_ENERGY_LEVEL2_LPA     17
-#define SYSTEM_ENERGY_LEVEL2         20
-#define SYSTEM_ENERGY_LEVEL3         30
+#define SYSTEM_ENERGY_LEVEL0                 0
+#define SYSTEM_ENERGY_LEVEL1                 10
+#define SYSTEM_ENERGY_LEVEL1_LPA             15
+#define SYSTEM_ENERGY_LEVEL2_LPA             17
+#define SYSTEM_ENERGY_LEVEL2                 20
+#define SYSTEM_ENERGY_LEVEL3_EMG             30
+#define SYSTEM_ENERGY_LEVEL3_MOTION          32
 
 #define WORKING_STATUS_OK                    0
 #define WORKING_STATUS_LOW_BATTERY           1
@@ -11,7 +12,7 @@
 #define WORKING_STATUS_DECLINE_CONNECTION    9
 #define WORKING_STATUS_REQUEST_DISCONNECT    15
 
-#define HEALEREMG_SERIAL_NUMBER    0x46, 0x52, 0x31, 0x38, 0x31, 0x32, 0x30, 0x32, 0x30, 0x31, 0x37, 0x30, 0x30, 0x30, 0x31, 0x30, 0x32
+#define HEALEREMG_SERIAL_NUMBER    0x46, 0x52, 0x31, 0x38, 0x31, 0x32, 0x30, 0x32, 0x30, 0x31, 0x37, 0x30, 0x30, 0x30, 0x32, 0x32, 0x32
 
 #define LOW_RX                  0
 #define HIGH_RX                 1
@@ -23,31 +24,41 @@
 
 #define ADC_SMOOTH_FORCE_MAX    10
 
-#define EMG_FREQ_MIN            1
-#define EMG_FREQ_MAX            60
+//#define EMG_FREQ_MIN            1
+//#define EMG_FREQ_MAX            60
 
 #define MOTION_OFF              0
 #define MOTION_ON               0x80
 
 #define MPU_WAKE_POWER_DEFAULT  250
 
-#define MPL_FREQ_MIN            10
-#define MPL_FREQ_MAX            50
+//#define MPL_FREQ_MIN            10
+//#define MPL_FREQ_MAX            50
 
 #define ENABLE_AUTO_SLEEP       1 // <-- 是否允许以Power_releaseConstraint方式
 
 #define OUTPUT_BYTE_OFFSET      2 // <--蓝牙数据输出地址偏移量
 
 // 9-Axis Fusion Mode (0-False 1-True)
-#define AXIS_9_FUSION_MODE      1
+#define AXIS_9_FUSION_MODE      0
+#define AXIS_3_FUSION_MODE      1
 
 //开机时默认数值的设置
 #define DEFAULT_EMG_FREQ        1024 // <-- 原 20
-#define DEFAULT_MOTION_FREQ     20
-#define DEFAULT_OUTPUT_FORMAT   3
+#define DEFAULT_MOTION_FREQ     200  // <-- 原 20
+#define DEFAULT_OUTPUT_FORMAT   5   // <-- 原 3，欧拉角
 #define EMG_RESET_INTERVAL      500
 
-#define EMG_SAMPLE_CYCLE_COUNT  40 // <-- 多少个EMG采样周期过后，才能发送一次数据
+#define EMG_SAMPLE_CYCLE_COUNT     40 // <-- 多少个EMG采样周期过后，才能发送一次数据
+
+#define MOTION_INTERVAL            5  // <-- 间隔多少毫秒，取一次Motion数据（与MotionFreq对应）
+#define MOTION_SAMPLE_CYCLE_COUNT  6  // <-- 多少个Motion采样周期过后，才能发送一次数据
+#define MOTION_DATA_LENGTH         20 // <-- 每个Motion最大多少字节
+#define MOTION_SAMPLE_WITH_BLE     0  // <-- 蓝牙发送循环之前是否同时伴随采样(0-不伴随 1-伴随)
+
+#define IDLE_INTERVAL              50 // <-- 间隔多少毫秒执行一次Idle循环
+
+#define BLE_BYTES_MAX              240 // <-- 每次蓝牙发射最大多少字节
 
 //每多少个蓝牙周期才进行一次运算和采样（成品应为0）
 #define BLE_ACTIVE_INTERVAL     0
@@ -99,6 +110,15 @@
 #define WORKLEVEL2_WITHOUT_MPU      0
 //测试：永远保持充电/不充电状态，0-不设定 1-永远不充电 2-永远充电（成品应为0）
 #define CHARGE_STATUS_KEEP          0
+
+//测试：是否使用DIO-6（白灯）来测试采样周期（成品应为0）
+#define DIO_6_SAMPLE_RATE           0
+//测试：EMG在持续采样时，电位反复变化还是维持高电平（0-维持高电平 1-反复变化）
+//若上一个数值为0，则该数值没意义
+#define DIO_6_SAMPLE_VARI           0
+
+//测试：是否让EMG输出假数据，假数据的变化幅度（成品应为0）
+#define MIRAGE_EMG_MODE             0 // <-- 测试时设为 50
 
 //被外因挂断后，允许尝试不经陀螺仪同意而自动连接的次数（成品应为10）
 #define CONNECT_WITHOUT_MPU         10

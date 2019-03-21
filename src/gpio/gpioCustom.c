@@ -84,6 +84,10 @@ void PIN_RLight(void){
 void PIN_RDark(void){
   PIN_setOutputValue(hLedPin, Board_PIN_LED1, 0);
 }
+void PIN_Both(void){
+  PIN_setOutputValue(hLedPin, Board_PIN_LED1, 1);
+  PIN_setOutputValue(hLedPin, Board_PIN_LED0, 1);
+}
 
 //Ö¸Áî£º°×µÆ³£ÁÁ
 void pinGLightConst(void){
@@ -99,6 +103,9 @@ void pinRLightConst(void){
 }
 //Ö¸Áî£º°×µÆµÍÆµÉÁ
 void pinGLightBlink(void){
+  if(DIO_6_SAMPLE_RATE > 0){
+    return;
+  }
   if(blickProcessing <= 0){
     //Ã»ÔÚÉÁ£¬¿ªÆô
     Util_startClock(&blinkClock);

@@ -306,9 +306,16 @@ static ICall_EntityID selfEntity;
 static ICall_SyncHandle syncEvent;
 
 // Clock instances for internal periodic events.
-static Clock_Struct periodicClock;
+static Clock_Struct periodicEMGClock;
 static Clock_Struct emgGetClock;
 static Clock_Struct emgLastGetClock;
+
+static Clock_Struct periodicMotionClock;
+//static Clock_Struct motionGetClock;
+//static Clock_Struct motionLastGetClock;
+
+static Clock_Struct periodicIdleClock;
+
 static Clock_Struct initializeClock;
 static Clock_Struct advertiseClock;
 static Clock_Struct advertiseShortClock;
@@ -435,6 +442,8 @@ static void SimpleBLEPeripheral_performPeriodicTask(void);
 static void SimpleBLEPeripheral_clockHandler(UArg arg);
 static void SimpleBLEPeripheral_emgHandler(UArg arg);
 static void SimpleBLEPeripheral_emgLastHandler(UArg arg);
+//static void SimpleBLEPeripheral_motionHandler(UArg arg);
+//static void SimpleBLEPeripheral_motionLastHandler(UArg arg);
 
 static void SimpleBLEPeripheral_performInitializeTask(void);
 static void SimpleBLEPeripheral_initializeHandler(UArg arg);
@@ -468,26 +477,39 @@ extern void AssertHandler(uint8 assertCause, uint8 assertSubcause);
 //ADC相关变量
 //extern含义：这个变量是别处定义的，但我要在这儿用
 extern uint8_t adcInitResult;
-extern uint8_t adcConvertResult;
+//extern uint8_t adcConvertResult;
 //extern ADC_Handle   adc;
 //extern ADC_Params   params;
-extern int_fast16_t res;
+//extern int_fast16_t res;
 /* ADC conversion result variables */
 uint16_t adcValue0Result;
 
-//ADC积分相关算法
-uint8_t adcStackIndi = 0;
-uint8_t adcStackPointer = 0;
-uint16_t adcSamples[ADC_SMOOTH_FORCE_MAX];
+//EMG积分相关算法
+//uint8_t adcStackIndi = 0;
+//uint8_t adcStackPointer = 0;
+//uint16_t adcSamples[ADC_SMOOTH_FORCE_MAX];
 
-//ADC采样循环相关变量
+//EMG采样循环相关变量
 uint8_t emgCycleCount = 0;
+//Motion采样循环相关变量
+uint8_t motionCycleCount = 0;
+//Motion在主循环执行时，做什么（0-什么也不做 1-仅收集数据 2-仅发蓝牙 3-二者都做）
+uint8_t motionAction = 0;
+//额外定义
+static void fillEMGWithData(uint8_t fData);
+static void fillMotionWithData(uint8_t fData);
 
-//输出EMG和FPS速率
+//输出EMG、Motion和FPS速率
 uint16_t emgCount = 0;
 uint16_t emgCount_OUT = 0;
 extern uint16_t getEMGCount_OUT(void){
   return emgCount_OUT;
+}
+
+uint16_t motionCount = 0;
+uint16_t motionCount_OUT = 0;
+extern uint16_t getMotionCount_OUT(void){
+  return motionCount_OUT;
 }
 
 uint8_t fpsCount = 0;
@@ -612,12 +634,29 @@ static void SimpleBLEPeripheral_init(void)
 
   // Create one-shot clocks for internal periodic events.
   //SBP_PERIODIC_EVT_PERIOD
-  Util_constructClock(&periodicClock, SimpleBLEPeripheral_clockHandler,
-                      6, 0, false, NULL); // <-- 原 10
+  
+  //供EMG运行循环使用的时钟
+  Util_constructClock(&periodicEMGClock, SimpleBLEPeripheral_clockHandler,
+                      6, 0, false, SBP_PERIODIC_EVT); // <-- 原 10
   Util_constructClock(&emgGetClock, SimpleBLEPeripheral_emgHandler,
                       1, 0, false, NULL);
   Util_constructClock(&emgLastGetClock, SimpleBLEPeripheral_emgLastHandler,
                       1, 0, false, SBP_PERIODIC_EVT);
+  
+  //供Motion运行循环使用的时钟
+  Util_constructClock(&periodicMotionClock, SimpleBLEPeripheral_clockHandler,
+                      MOTION_INTERVAL, 0, false, SBP_PERIODIC_EVT);
+  /*
+  Util_constructClock(&motionGetClock, SimpleBLEPeripheral_motionHandler,
+                      MOTION_INTERVAL, 0, false, NULL);
+  Util_constructClock(&motionLastGetClock, SimpleBLEPeripheral_motionLastHandler,
+                      MOTION_INTERVAL, 0, false, SBP_PERIODIC_EVT);
+  */
+  
+  //供Idle运行循环使用的时钟
+  Util_constructClock(&periodicIdleClock, SimpleBLEPeripheral_clockHandler,
+                      IDLE_INTERVAL, 0, false, SBP_PERIODIC_EVT);
+  
   // Create one-shot clocks for initialization events.
   Util_constructClock(&initializeClock, SimpleBLEPeripheral_initializeHandler,
                       SBP_INITIALIZE_EVT_PERIOD, 0, false, SBP_INITIALIZE_EVT);
@@ -741,8 +780,8 @@ static void SimpleBLEPeripheral_init(void)
     uint8_t charValue4 = 8; //adcConvertResult; // <-- 原8; // <-- 要改为adcConvertResult;
     uint8_t charValue5[SIMPLEPROFILE_CHAR5_LEN] = { 1, 2, 3, 4, 5, 6 };
     uint8_t charValue6 = 9;
-    uint8_t emgInitRate = DEFAULT_EMG_FREQ;
-    uint8_t motionInitRate = DEFAULT_MOTION_FREQ;
+    uint8_t emgInitRate = 0;
+    uint8_t motionInitRate = 0;
     //I2C初始化
     initI2C();
     //MPL输出区初始化
@@ -935,9 +974,21 @@ static void SimpleBLEPeripheral_taskFxn(UArg a0, UArg a1)
 
       if (events & SBP_PERIODIC_EVT)
       {
-        //等待计时完成一次后再生成一个SBP_PERIODIC_EVT事件
-        Util_startClock(&periodicClock);
-        //Util_startClock(&emgGetClock);
+        //等待计时完成一次后再生成一个SBP_PERIODIC_EVT事件（需要判断是何种时钟运行）
+        //Util_startClock(&periodicIdleClock);
+        //EMG判定优先，虽然EMG和Motion的打开是矛盾变量
+        uint8_t workLevel = getSYSTEMWorkLevel();
+        switch(workLevel){
+        case SYSTEM_ENERGY_LEVEL3_EMG:
+          Util_startClock(&periodicEMGClock);
+          break;
+        case SYSTEM_ENERGY_LEVEL3_MOTION:
+          Util_startClock(&periodicMotionClock);
+          break;
+        default:
+          Util_startClock(&periodicIdleClock);
+          break;
+        }
         // Perform periodic application task
         SimpleBLEPeripheral_performPeriodicTask();
       }
@@ -1357,7 +1408,9 @@ static void SimpleBLEPeripheral_processStateChangeEvt(gaprole_States_t newState)
         
         //打开时钟，等待计时结束，事件生成后执行perodicTask
         //注：只有蓝牙已连接状况下才执行
-        Util_startClock(&periodicClock);
+        fillEMGWithData(0);
+        fillMotionWithData(0);
+        Util_startClock(&periodicIdleClock);
         if(FPS_STATUS_MODE){
           Util_startClock(&emgFPSClock);
         }
@@ -1427,9 +1480,13 @@ static void SimpleBLEPeripheral_processStateChangeEvt(gaprole_States_t newState)
     case GAPROLE_WAITING:
     case GAPROLE_WAITING_AFTER_TIMEOUT:
       //这里是蓝牙断开时最先执行的部分
-      Util_stopClock(&periodicClock);
+      Util_stopClock(&periodicEMGClock);
       Util_stopClock(&emgGetClock);
       Util_stopClock(&emgLastGetClock);
+      Util_stopClock(&periodicMotionClock);
+      //Util_stopClock(&motionGetClock);
+      //Util_stopClock(&motionLastGetClock);
+      Util_stopClock(&periodicIdleClock);
       Util_stopClock(&emgFPSClock);
       //这里，只要一停掉使用蓝牙的程序，或者人工挂断连接，蓝牙就断开
       SimpleBLEPeripheral_freeAttRsp(bleNotConnected);
@@ -1595,7 +1652,7 @@ static void EulerPeripheral_processCharValueChangeEvt(uint8_t paramID)
  */
 static void SimpleBLEPeripheral_performInitializeTask(void)
 {
-  uint8_t i;
+  //uint8_t i;
   PIN_GLight();
   //PIN_RLight();
   //这里处理MPU初始化线程
@@ -1606,10 +1663,10 @@ static void SimpleBLEPeripheral_performInitializeTask(void)
       case 8:
         initMPLService();
         //初始化EMG数组栈
-        for(i = 0; i < ADC_SMOOTH_FORCE_MAX; i++){
-          adcSamples[i] = 0;
-        }
-        adcStackPointer = 0;
+        //for(i = 0; i < ADC_SMOOTH_FORCE_MAX; i++){
+          //adcSamples[i] = 0;
+        //}
+        //adcStackPointer = 0;
         break;
       case 7:
         initMPLService_STEP1();
@@ -1642,10 +1699,10 @@ static void SimpleBLEPeripheral_performInitializeTask(void)
       case 4:
         initMPLService();
         //初始化EMG数组栈
-        for(i = 0; i < ADC_SMOOTH_FORCE_MAX; i++){
-          adcSamples[i] = 0;
-        }
-        adcStackPointer = 0;
+        //for(i = 0; i < ADC_SMOOTH_FORCE_MAX; i++){
+          //adcSamples[i] = 0;
+        //}
+        //adcStackPointer = 0;
         break;
       case 3:
         initMPLService_STEP1_TEST();
@@ -1681,7 +1738,7 @@ extern void mplTaskAtMainLoop(void);
 //static uint8_t mplIsInitialized = 0;
 static uint8_t adcServiceGo = 0;
 //static uint8_t batterySampleCount = 0;
-static uint16_t adcTempResult = 0;
+//static uint16_t adcTempResult = 0;
 //static uint8_t bleCycleCount = 127;
 
 static uint8_t workStatus = 0; // <-- 自身工作状态
@@ -1695,9 +1752,13 @@ static void forceStopBLE(void){
   terminateConnectionWithDisabled = 1;
   enableConnectBLE = 0;
   bleStopReason = 1;
-  Util_stopClock(&periodicClock);
+  Util_stopClock(&periodicEMGClock);
   Util_stopClock(&emgGetClock);
   Util_stopClock(&emgLastGetClock);
+  Util_stopClock(&periodicMotionClock);
+  //Util_stopClock(&motionGetClock);
+  //Util_stopClock(&motionLastGetClock);
+  Util_stopClock(&periodicIdleClock);
   Util_stopClock(&emgFPSClock);
   SimpleBLEPeripheral_freeAttRsp(bleNotConnected);
   GAPRole_TerminateConnection();
@@ -1710,40 +1771,116 @@ uint8_t i;
 uint8_t adcTotalNum;
 uint8_t batteryIsLow;
 static uint16_t workResult;
+
 //给EMG留几个采样单元
 uint8_t emgSampleUnit[EMG_SAMPLE_CYCLE_COUNT * 2] = {0};
-//测试用变量：显示哪一个EMGCycleCount
+//给Motion留几个采样单元
+uint8_t motionSampleUnit[MOTION_DATA_LENGTH * (MOTION_SAMPLE_CYCLE_COUNT + MOTION_SAMPLE_WITH_BLE)] = {0};
+//uint8_t motionSampleUnit[BLE_BYTES_MAX] = {0};
+
+//获取emgSampleUnit的地址
 uint8_t displayEMGUnit = 0;
-extern uint8_t *getEmgSampleUnit(void){
+uint8_t *getEmgSampleUnit(void){
   return emgSampleUnit;
 }
+//获取motionSampleUnit的地址
+//uint8_t displayEMGUnit = 0;
+uint8_t *getMotionSampleUnit(void){
+  return motionSampleUnit;
+}
+
+//测试用变量：EMG的假数据
+uint16_t mirageEMGData = 238;
+int mirageEMGDirect = 1;
+
+//将EMG数组用什么数填满
+static void fillEMGWithData(uint8_t fData){
+  uint8_t i = 0;
+  for(i = 0; i < EMG_SAMPLE_CYCLE_COUNT * 2; i++){
+    emgSampleUnit[i] = fData;
+  }
+}
+//将Motion数组用什么数填满
+static void fillMotionWithData(uint8_t fData){
+  uint8_t i = 0;
+  for(i = 0; i < MOTION_DATA_LENGTH * (MOTION_SAMPLE_CYCLE_COUNT + MOTION_SAMPLE_WITH_BLE); i++){
+    motionSampleUnit[i] = fData;
+  }
+}
+
+//副循环1：EMG采样
 static void SimpleBLEPeripheral_performEMGTask(void){
   if(emgCycleCount < EMG_SAMPLE_CYCLE_COUNT){
     emgCycleCount += 1;
     emgCount += FPS_STATUS_MODE;
     Util_startClock(&emgGetClock);
+    if(DIO_6_SAMPLE_RATE){
+      //白灯为EMG采样测试模式
+      if(DIO_6_SAMPLE_VARI){
+        if(emgCycleCount % 2 == 0){
+          PIN_GDark();
+        }else{
+          PIN_GLight();
+        }
+      }else{
+        PIN_GLight();
+      }
+    }
   }else{
     emgCycleCount = 0;
     fpsCount += FPS_STATUS_MODE;
     Util_startClock(&emgLastGetClock);
+    if(DIO_6_SAMPLE_RATE){
+      if(DIO_6_SAMPLE_VARI){
+        PIN_GLight();
+      }else{
+        PIN_GDark();
+      }
+    }
+    return;
   }
-  adcValue0Result = getADCData();
+  if(MIRAGE_EMG_MODE <= 0){
+    //使用真数据
+    adcValue0Result = getADCData();
+  }else{
+    //使用假数据
+    adcValue0Result = mirageEMGData;
+    if(mirageEMGDirect > 0){
+      mirageEMGData += MIRAGE_EMG_MODE;
+      if(mirageEMGData >= 2238){
+        mirageEMGDirect = -1;
+      }
+    }else{
+      mirageEMGData -= MIRAGE_EMG_MODE;
+      if(mirageEMGData <= 238){
+        mirageEMGDirect = 1;
+      }
+    }
+  }
   uint16_t adcHigh = (adcValue0Result >> 8);
   uint16_t adcLow = (adcValue0Result % 256);
-  emgSampleUnit[emgCycleCount * 2] = (uint8_t)adcHigh;
-  emgSampleUnit[emgCycleCount * 2 + 1] = (uint8_t)adcLow;
+  //将EMG的记录顺序改变回来
+  emgSampleUnit[(emgCycleCount - 1) * 2] = (uint8_t)adcHigh;
+  emgSampleUnit[(emgCycleCount - 1) * 2 + 1] = (uint8_t)adcLow;
 }
+
+//主循环：判断工作状态以及应该发射何种数据
+//uint8_t mainTestNum = 0;
 static void SimpleBLEPeripheral_performPeriodicTask(void){
 #ifndef FEATURE_OAD_ONCHIP
   workResult = 0;
-  long adcSigma;
+  //long adcSigma;
   workStatus = WORKING_STATUS_OK; // <-- 工作状态：0为正常
+  
+  //标志置位：是否按照正常流程检测电压大小
+  uint8_t normalLightFlag = 1;
   
   //是否为低电压请求挂断模式
   if(REJECT_CONNECT_ON_LOWBATT > 0){
     //检查电源：如果电源电压降至关机电压以下，就请求App端断开连接
     if(getBatteryData() <= SHUTDOWN_LOW_VOLTAGE){
       workStatus = WORKING_STATUS_REQUEST_DISCONNECT;
+      normalLightFlag = 0;
     }
     //检查充电：如果放在充电器上，同样会请求App端断开连接
     if(isCharging(0) > 0){
@@ -1751,93 +1888,151 @@ static void SimpleBLEPeripheral_performPeriodicTask(void){
     }
   }
   
-  //判定系统工况
+  //检查充电状态
+  if(isCharging(0) > 0){
+    normalLightFlag = 0;
+    //充电中：持续使用充电灯光
+    if(isChargeCompleted() > 0){
+      pinGLightConst();
+    }else{
+      pinRLightConst();
+    }
+  }
+  
+  //系统工况
   workLevel = getSYSTEMWorkLevel();
-  if(workLevel < SYSTEM_ENERGY_LEVEL2){
+  uint8_t sendMotionFlag = 0;
+  switch(workLevel){
+  case SYSTEM_ENERGY_LEVEL2:
+    //2级Idle状态：仅按照1秒空发射20次EMG工作，其它采样什么也不干
+    if(getEMGOpen() == 1){
+      //检测到EMG被打开
+      setSYSTEMWorkLevel(SYSTEM_ENERGY_LEVEL3_EMG);
+    }else if(getMotionOpen() == 1){
+      //检测到Motion被打开
+      fillMotionWithData(0);
+      setSYSTEMWorkLevel(SYSTEM_ENERGY_LEVEL3_MOTION);
+    }
+    fillEMGWithData(0);
+    break;
+  case SYSTEM_ENERGY_LEVEL3_EMG:
+    //3级EMG状态：1秒发射20次EMG工作，空闲时段连续采样EMG
+    if(getMotionOpen() == 1){
+      //检测到Motion被打开
+      fillMotionWithData(0);
+      setSYSTEMWorkLevel(SYSTEM_ENERGY_LEVEL3_MOTION);
+    }else if(getEMGOpen() == 0){
+      //检测到EMG被关闭
+      setSYSTEMWorkLevel(SYSTEM_ENERGY_LEVEL2);
+    }
+    break;
+  case SYSTEM_ENERGY_LEVEL3_MOTION:
+    //3级Motion状态：1秒发射20次Motion，空闲时段连续采样Motion
+    if(getEMGOpen() == 1){
+      //检测到EMG被打开
+      fillEMGWithData(0);
+      setSYSTEMWorkLevel(SYSTEM_ENERGY_LEVEL3_EMG);
+    }else if(getMotionOpen() == 0){
+      //检测到Motion被关闭
+      setSYSTEMWorkLevel(SYSTEM_ENERGY_LEVEL2);
+    }
+    
+    //这里执行Motion的MainLoop内部循环
+    if(motionCycleCount < MOTION_SAMPLE_CYCLE_COUNT){
+      //蓝牙采样
+      motionAction = 1;
+      motionCycleCount += 1;
+      motionCount += FPS_STATUS_MODE;
+    }else{
+      //蓝牙主循环
+      if(MOTION_SAMPLE_WITH_BLE > 0){
+        motionAction = 3;
+        motionCount += FPS_STATUS_MODE;
+      }else{
+        motionAction = 2;
+        motionCycleCount = 0;
+      }
+      fpsCount += FPS_STATUS_MODE;
+    }
+    
+    sendMotionFlag = 1;
+    //fillEMGWithData(5);
+    break;
+  default:
+    //不正确的工况或2级待拍击状态：等待摇晃进入2级Idle，也会1秒空发20次EMG
     if(workStatus == WORKING_STATUS_OK){
       workStatus = WORKING_STATUS_WAIT_FOR_TAP;
-    }else if(workStatus == WORKING_STATUS_REQUEST_DISCONNECT){
-      workStatus = WORKING_STATUS_DECLINE_CONNECTION;
-    }
-    //在EMG取样Cycle中什么也不做，只空跑
-    //if(emgCycleCount <= EMG_SAMPLE_CYCLE_COUNT){
-      //emgSampleUnit[emgCycleCount * 2] = 0;
-      //emgSampleUnit[emgCycleCount * 2 + 1] = 0;
-      //emgCycleCount += 1;
-    //}else{
-      emgCycleCount = 0;
-      //根据采样种类判定应该给EMG发送数据还是给Motion发送数据
-      if((adcServiceGo % 2) != 0){
-        //肌电空发数据
-        if(isCharging(0) > 0){
-          //充电中：持续使用充电灯光
-          if(isChargeCompleted() > 0){
-            pinGLightConst();
-          }else{
-            pinRLightConst();
-          }
-        }else{
-          //不在充电中：电池足够就亮灯，否则不亮
-          if(workStatus == WORKING_STATUS_WAIT_FOR_TAP){
-            setLEDWorkBlink(workLevel);
-          }else{
-            pinDark(1);
-          }
-        }
-        adcTempResult = 0;
-        //将工作状态合并到adcTempResult的最高4位
-        workResult = workStatus;
-        adcTempResult += (workResult << 12);
-        //心跳机制计数+1
-        heartBeatCount += ENABLE_HEARTBEAT;
-        if(heartBeatCount >= HEARTBEAT_MAX_INTERVAL){
-          //若心跳机制计数达到上限则需采取措施
-          heartBeatCount = HEARTBEAT_MAX_INTERVAL;
-          if(ENABLE_AUTO_DISCONNECT_BY_HEARTBEAT > 0){
-            forceStopBLE();
-          }
-        }
-        SimpleProfile_SetParameter(SIMPLEPROFILE_CHAR4, sizeof(uint16_t), &adcTempResult);
-        adcServiceGo += 1;
-        if(adcServiceGo >= 4){
-          adcServiceGo = 0;
-        }
-      }else{
-        //陀螺仪空发数据
-        XYZEuler_SetParameter(XYZ_EULER_CHAR4, sizeof(uint8_t), &adcServiceGo);
-        adcServiceGo += 1;
+      if(normalLightFlag > 0){
+        pinGLightConst();
       }
-      //如果发现了连接信号，则在下回进入该方法时，切换到2级状态
       if(enableConnectBLE > 0){
         enableConnectBLE = 0;
         setSYSTEMWorkLevel(SYSTEM_ENERGY_LEVEL2);
+        setLEDWorkBlink(SYSTEM_ENERGY_LEVEL2);
       }
-    //}
-    //emgCount = 0;
-    //fpsCount = 0;
-    return;
+    }else if(workStatus == WORKING_STATUS_REQUEST_DISCONNECT){
+      workStatus = WORKING_STATUS_DECLINE_CONNECTION;
+    }
+    fillEMGWithData(0);
+    normalLightFlag = 0;
+    break;
   }
   
-  //在EMG取样Cycle中什么也不做，只采样
-  /*
-  if(emgCycleCount < EMG_SAMPLE_CYCLE_COUNT){
-    adcValue0Result = getADCData();
-    uint16_t adcHigh = (adcValue0Result >> 8);
-    uint16_t adcLow = (adcValue0Result % 256);
-    //uint16_t adcHigh = 1;
-    //uint16_t adcLow = emgCycleCount;
-    //uint16_t adcHigh = (emgCount_OUT >> 8);
-    //uint16_t adcLow = (emgCount_OUT % 256);
-    emgSampleUnit[emgCycleCount * 2] = (uint8_t)adcHigh;
-    emgSampleUnit[emgCycleCount * 2 + 1] = (uint8_t)adcLow;
-    emgCycleCount += 1;
-    //emgCount += 1;
-    return;
-  }else{
-    //fpsCount += 1;
-    emgCycleCount = 0;
+  //检测二极管闪烁
+  if(normalLightFlag > 0){
+    if(getBatteryData() <= SHUTDOWN_LOW_VOLTAGE){
+      if(REJECT_CONNECT_ON_LOWBATT > 0){
+        workStatus = WORKING_STATUS_REQUEST_DISCONNECT;
+      }else{
+        workStatus = WORKING_STATUS_LOW_BATTERY;
+      }
+    }else if(workStatus == WORKING_STATUS_OK){
+      if(getBatteryData() <= BATTERY_LOW_VOLTAGE){
+        workStatus = WORKING_STATUS_LOW_BATTERY;
+      }
+    }
+    setLEDWorkBlink(workLevel);
   }
-  */
+  
+  //将工作状态合并到adcTempResult的最高4位
+  workResult = workStatus;
+  emgSampleUnit[0] += (workResult << 4);
+  
+  //判断是EMG模式还是Motion模式，蓝牙所发数据不一样
+  if(sendMotionFlag == 0){
+    //EMG模式
+    uint8_t *emgAddress = getEmgSampleUnit();
+    //PIN_RLight();
+    SimpleProfile_SetParameter(SIMPLEPROFILE_CHAR4, EMG_SAMPLE_CYCLE_COUNT * 2, emgAddress);
+  }else{
+    //Motion模式：根据Motion的行为变量判定循环体内要做什么
+    
+    //1.取样与写入
+    if((motionAction & 1) > 0){
+      mplTaskAtMainLoop();
+      //向Motion数组内写入数据（并且对数据进行分析）
+      char mplResult[MOTION_DATA_LENGTH] = {0};
+      getBleOutData(mplResult);
+      //如果是FPS统计模式，则改写数据最后两字节为FPS和采样点数
+      //if(FPS_STATUS_MODE > 0){
+        //mplResult[MOTION_DATA_LENGTH - 1] = 0; // <-- 倒数第一字节：采样点数
+        //mplResult[MOTION_DATA_LENGTH - 2] = 0; // <-- 倒数第二字节：FPS
+      //}
+      uint8_t i = 0;
+      for(i = 0; i < MOTION_DATA_LENGTH; i++){
+        motionSampleUnit[i + MOTION_DATA_LENGTH * (motionCycleCount - 1)] = mplResult[i];
+      }
+    }
+    //2.发送与清零
+    if((motionAction & 2) > 0){
+      uint8_t *motionAddress = getMotionSampleUnit();
+      //PIN_RLight();
+      XYZEuler_SetParameter(XYZ_EULER_CHAR4, MOTION_DATA_LENGTH * (MOTION_SAMPLE_CYCLE_COUNT + MOTION_SAMPLE_WITH_BLE), motionAddress);
+      
+      fillMotionWithData(0);
+      motionCycleCount = 0;
+    }
+  }
   
   //心跳机制计数+1
   heartBeatCount += ENABLE_HEARTBEAT;
@@ -1849,110 +2044,10 @@ static void SimpleBLEPeripheral_performPeriodicTask(void){
     }
   }
   
-  //系统工作够2级工况：判断是EMG打开，还是Motion打开，还是全打开
-  if(workLevel == SYSTEM_ENERGY_LEVEL2){
-    //EMG关闭
-    if(getMotionOpen()){
-      //Motion打开
-      adcServiceGo += 2; // <-- 只去Motion发送环节
-      if(adcServiceGo >= 4){
-        adcServiceGo = 0;
-      }
-    }else{
-      //Motion关闭
-      adcServiceGo = 1; // <-- 只去EMG发送环节
-    }
-  }else{
-    //EMG打开
-    if(getMotionOpen()){
-      //Motion打开
-      adcServiceGo += 1; // <-- Motion和EMG交替发送
-      if(adcServiceGo >= 4){
-        adcServiceGo = 0;
-      }
-    }else{
-      //Motion关闭
-      adcServiceGo = 1; // <-- 只去EMG发送环节
-    }
-  }
-  
-  //肌电和陀螺仪交替处理(只有工作状态至少正2级以上才会进入这个方法)
-  if((adcServiceGo % 2) != 0){
-    //轮到肌电处理
-    
-    //判定灯光和电压状态
-    batteryIsLow = setLEDWorkBlink(workLevel);
-    if(workStatus == WORKING_STATUS_OK){
-      workStatus = batteryIsLow;
-    }
-    switch(workLevel){
-    case SYSTEM_ENERGY_LEVEL2:
-      //不在3级水平的工况：肌电数值恒定为0，并且不执行EMG采集工作
-      adcTempResult = 0;
-      if(getEMGOpen() == 1){
-        //系统设定被启动了
-        setSYSTEMWorkLevel(SYSTEM_ENERGY_LEVEL3);
-      }
-      //将工作状态合并到adcTempResult的最高4位
-      workResult = workStatus;
-      adcTempResult += (workResult << 12);
-      SimpleProfile_SetParameter(SIMPLEPROFILE_CHAR4, sizeof(uint16_t), &adcTempResult);
-      break;
-    case SYSTEM_ENERGY_LEVEL3:
-      //蓝牙持续循环的同时，执行EMG的读取分析工作
-      //adcValue0Result = getADCData();
-      uint8_t *adcAddress = getEmgSampleUnit();
-      //adcValue0Result = *(adcAddress + displayEMGUnit * 2 + 1);
-      //adcValue0Result += *(adcAddress + displayEMGUnit * 2) * 256;
-      //ADC打开成功且转换成功：这里计算ADC平滑后的数值
-      /*
-      if(getEMGSmooth() > 0){
-        adcTotalNum = getEmgSmoPowByCalc();
-        adcSamples[adcStackPointer] = adcValue0Result;
-        //数据是否在平滑栈中堆满？满了就返回头一个
-        adcStackPointer += 1;
-        if(adcStackPointer >= adcTotalNum){
-          adcStackPointer = 0;
-        }
-        //取头几个平滑？
-        adcSigma = 0;
-        for(i = 0; i < adcTotalNum; i++){
-          adcSigma += adcSamples[i];
-        }
-        adcTempResult = adcSigma / adcTotalNum;
-      }else{
-        //不启用平滑：直接赋值
-        adcTempResult = adcValue0Result;
-      }
-      */
-      
-      //将工作状态合并到数组中第一个adcTempResult的最高4位
-      workResult = workStatus;
-      emgSampleUnit[0] += (workResult << 4);
-      if(getEMGOpen() == 0){
-        //系统设定被关闭了
-        setSYSTEMWorkLevel(SYSTEM_ENERGY_LEVEL2);
-      }
-      SimpleProfile_SetParameter(SIMPLEPROFILE_CHAR4, EMG_SAMPLE_CYCLE_COUNT * 2, adcAddress);
-      break;
-    default:
-      //不正确的工况：肌电数值恒定为0，并且不执行EMG采集工作
-      adcTempResult = 0;
-      //将工作状态合并到adcTempResult的最高4位
-      workResult = workStatus;
-      adcTempResult += (workResult << 12);
-      SimpleProfile_SetParameter(SIMPLEPROFILE_CHAR4, sizeof(uint16_t), &adcTempResult);
-      break;
-    }
-  }else{
-    //轮到陀螺仪处理
-    if(getMotionOpen() == 1){
-      //蓝牙持续循环的同时，执行dmp的读取分析工作
-      mplTaskAtMainLoop();
-    }
-    //陀螺仪信号的处理（伪处理，必须是某个值变化了才通知用户）
-    XYZEuler_SetParameter(XYZ_EULER_CHAR4, sizeof(uint8_t), &adcServiceGo);
-  }
+  //后续工作
+  //emgCycleCount = 0;
+  //motionCycleCount = 0;
+  //XYZEuler_SetParameter(XYZ_EULER_CHAR4, sizeof(uint8_t), &adcServiceGo);
 #endif //!FEATURE_OAD_ONCHIP
 }
 
@@ -2005,13 +2100,58 @@ void SimpleBLEPeripheral_processOadWriteCB(uint8_t event, uint16_t connHandle,
  *
  * @return  None.
  */
+
+//时钟循环的分类
+
+//0类循环：根据分支判定，应该打开EMG循环还是Motion循环
 static void SimpleBLEPeripheral_clockHandler(UArg arg)
 {
-  // Wake up the application.
-  // 这里是处理程序循环运行的关键，解锁Event_Pend
-  //Event_post(syncEvent, arg);
+  //EMG判定优先，虽然EMG和Motion的打开是矛盾变量
+  uint8_t workLevel = getSYSTEMWorkLevel();
+  switch(workLevel){
+  case SYSTEM_ENERGY_LEVEL3_EMG:
+    SimpleBLEPeripheral_performEMGTask();
+    break;
+  case SYSTEM_ENERGY_LEVEL3_MOTION:
+    //SimpleBLEPeripheral_performMotionTask();
+    Event_post(syncEvent, arg); // <-- Motion循环时现在只执行MainLoop了
+    break;
+  default:
+    Event_post(syncEvent, arg);
+    break;
+  }
+}
+
+//1类主循环：EMG往复循环
+static void SimpleBLEPeripheral_emgHandler(UArg arg)
+{
   SimpleBLEPeripheral_performEMGTask();
 }
+static void SimpleBLEPeripheral_emgLastHandler(UArg arg)
+{
+  if(DIO_6_SAMPLE_RATE){
+    PIN_GDark();
+  }
+  //准备放行蓝牙发射主体
+  Event_post(syncEvent, arg);
+}
+//1类副循环：EMG采样次数统计器
+static void SimpleBLEPeripheral_emgFPSHandler(UArg arg)
+{
+  //统计EMG、Motion和FPS并存入输出对象
+  emgCount_OUT = emgCount;
+  emgCount = 0;
+  
+  motionCount_OUT = motionCount;
+  motionCount = 0;
+
+  fpsCount_OUT = fpsCount;
+  fpsCount = 0;
+  
+  Util_startClock(&emgFPSClock);
+}
+
+//3类循环：初始化循环及待机广告循环（杂项）
 static void SimpleBLEPeripheral_initializeHandler(UArg arg)
 {
   // 唤醒APP并做优先级最高的处理：MPU初始化
@@ -2021,25 +2161,6 @@ static void SimpleBLEPeripheral_advertiseHandler(UArg arg)
 {
   //进入1级工况，继续下一轮的Advertising
   setSYSTEMWorkLevel(SYSTEM_ENERGY_LEVEL1);
-}
-static void SimpleBLEPeripheral_emgHandler(UArg arg)
-{
-  SimpleBLEPeripheral_performEMGTask();
-}
-static void SimpleBLEPeripheral_emgLastHandler(UArg arg)
-{
-  Event_post(syncEvent, arg);
-}
-static void SimpleBLEPeripheral_emgFPSHandler(UArg arg)
-{
-  //统计EMG和FPS并存入输出对象
-  emgCount_OUT = emgCount;
-  emgCount = 0;
-
-  fpsCount_OUT = fpsCount;
-  fpsCount = 0;
-  
-  Util_startClock(&emgFPSClock);
 }
 
 /*********************************************************************

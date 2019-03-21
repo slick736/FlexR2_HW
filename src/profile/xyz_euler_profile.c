@@ -185,7 +185,8 @@ static uint8 xyzEulerChar3UserDesp[17] = "Char 3 - Write F";
 static uint8 xyzEulerChar4Props = GATT_PROP_NOTIFY;
 
 // Characteristic 4 Value
-static uint8 xyzEulerChar4 = 0;
+//static uint8 xyzEulerChar4 = 0;
+static uint8 xyzEulerChar4[MOTION_DATA_LENGTH * (MOTION_SAMPLE_CYCLE_COUNT + MOTION_SAMPLE_WITH_BLE)] = {0};
 
 // Simple Profile Characteristic 4 Configuration Each client has its own
 // instantiation of the Client Characteristic Configuration. Reads of the
@@ -303,7 +304,7 @@ static gattAttribute_t xyzEulerAttrTbl[SERVAPP_NUM_ATTR_SUPPORTED] =
         { TI_UUID_SIZE, xyzEulerchar4UUID },
         0, 
         0, 
-        &xyzEulerChar4 
+        xyzEulerChar4 
       },
 
       // Characteristic 4 configuration
@@ -480,10 +481,21 @@ bStatus_t XYZEuler_SetParameter( uint8 param, uint8 len, void *value )
     case XYZ_EULER_CHAR4:
       if ( len == sizeof ( uint8 ) ) 
       {
-        xyzEulerChar4 = *((uint8*)value);
+        //xyzEulerChar4 = *((uint8*)value);
         
         // See if Notification has been enabled
-        GATTServApp_ProcessCharCfg( xyzEulerChar4Config, &xyzEulerChar4, FALSE,
+        GATTServApp_ProcessCharCfg( xyzEulerChar4Config, xyzEulerChar4, FALSE,
+                                    xyzEulerAttrTbl, GATT_NUM_ATTRS( xyzEulerAttrTbl ),
+                                    INVALID_TASK_ID, xyzEuler_ReadAttrCB );
+      }
+      else if ( len == MOTION_DATA_LENGTH * (MOTION_SAMPLE_CYCLE_COUNT + MOTION_SAMPLE_WITH_BLE) )
+      {
+        // v1.1.0.1以后EMG发射使用这个版本
+        uint8_t *tempValue = (uint8_t *)value;
+        for(int i = 0; i < len; i++){
+          xyzEulerChar4[i] = *(tempValue + i);
+        }
+        GATTServApp_ProcessCharCfg( xyzEulerChar4Config, xyzEulerChar4, FALSE,
                                     xyzEulerAttrTbl, GATT_NUM_ATTRS( xyzEulerAttrTbl ),
                                     INVALID_TASK_ID, xyzEuler_ReadAttrCB );
       }
@@ -534,7 +546,8 @@ bStatus_t XYZEuler_GetParameter( uint8 param, void *value )
 
     case XYZ_EULER_CHAR4:
       //*((uint8*)value) = xyzEulerChar4;
-      VOID memcpy( value, xyzEulerChar2, XYZ_EULER_CHAR5_LEN );
+      //VOID memcpy( value, xyzEulerChar2, XYZ_EULER_CHAR5_LEN );
+      *((uint8*)value) = xyzEulerChar4[0];
       break;
       
     default:
@@ -607,7 +620,7 @@ static bStatus_t xyzEuler_ReadAttrCB(uint16_t connHandle,
       case XYZ_EULER_CHAR4_UUID:
         
         //这个地方最重要，是MPU的对外输出功能！===================================
-        
+        /*
         getBleOutData(mplResult);
         for(i = 0; i < XYZ_EULER_CHAR5_LEN; i++){
           xyzEulerChar2[i] = mplResult[i];
@@ -615,6 +628,10 @@ static bStatus_t xyzEuler_ReadAttrCB(uint16_t connHandle,
         //最终输出
         *pLen = outputLength; // <-- 决定输出长度
         VOID memcpy(pValue - 2 - OUTPUT_BYTE_OFFSET, pAttr->pValue, XYZ_EULER_CHAR5_LEN); // <-- 决定输出地址
+        */
+        
+        *pLen = MOTION_DATA_LENGTH * (MOTION_SAMPLE_CYCLE_COUNT + MOTION_SAMPLE_WITH_BLE);
+        VOID memcpy( pValue, pAttr->pValue, *pLen );
         
         break;
         
@@ -717,12 +734,12 @@ static bStatus_t xyzEuler_WriteAttrCB(uint16_t connHandle,
             //UUID1多一个特有步骤：改写MPL采样频率、改变信号增益强度
             
             //步骤1：分析MPL采样频率
-            if(valueMPL < MPL_FREQ_MIN){
-              valueMPL = MPL_FREQ_MIN;
-            }
-            if(valueMPL > MPL_FREQ_MAX){
-              valueMPL = MPL_FREQ_MAX;
-            }
+            //if(valueMPL < MPL_FREQ_MIN){
+              //valueMPL = MPL_FREQ_MIN;
+            //}
+            //if(valueMPL > MPL_FREQ_MAX){
+              //valueMPL = MPL_FREQ_MAX;
+            //}
             *pCurValue = valueMPL;
             setMPLFreq(valueMPL);
             

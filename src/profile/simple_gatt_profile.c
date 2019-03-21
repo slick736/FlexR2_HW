@@ -184,6 +184,7 @@ static uint8 simpleProfileChar4Props = GATT_PROP_NOTIFY;
 
 // Characteristic 4 Value
 static uint8 simpleProfileChar4[EMG_SAMPLE_CYCLE_COUNT * 2] = {0};
+//static uint8 simpleProfileChar4[BLE_BYTES_MAX] = {0};
 
 // Simple Profile Characteristic 4 Configuration Each client has its own
 // instantiation of the Client Characteristic Configuration. Reads of the
@@ -500,7 +501,7 @@ bStatus_t SimpleProfile_SetParameter( uint8 param, uint8 len, void *value )
       }
       else if(len == EMG_SAMPLE_CYCLE_COUNT * 2)
       {
-        // v1.1.0.1以后使用这个版本
+        // v1.1.0.1以后EMG发射使用这个版本
         uint8_t *tempValue = (uint8_t *)value;
         for(int i = 0; i < len; i++){
           simpleProfileChar4[i] = *(tempValue + i);
@@ -719,14 +720,14 @@ static bStatus_t simpleProfile_WriteAttrCB(uint16_t connHandle,
             //UUID1多一个特有步骤：改写EMG采样频率、改变信号增益强度
             
             //步骤1：分析EMG采样频率
-            if(valueEMG < EMG_FREQ_MIN){
-              valueEMG = EMG_FREQ_MIN;
-            }
-            if(valueEMG > EMG_FREQ_MAX){
-              valueEMG = EMG_FREQ_MAX;
-            }
+            //if(valueEMG < EMG_FREQ_MIN){
+              //valueEMG = EMG_FREQ_MIN;
+            //}
+            //if(valueEMG > EMG_FREQ_MAX){
+              //valueEMG = EMG_FREQ_MAX;
+            //}
             *pCurValue = valueEMG;
-            setEMGFreq(valueEMG); // <-- 设定肌电采样频率
+            //setEMGFreq(valueEMG); // <-- 设定肌电采样频率
             
             //步骤2：分析蓝牙关闭预告位
             if(valueBLE >= 128){

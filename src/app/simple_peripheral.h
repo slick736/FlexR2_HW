@@ -98,8 +98,8 @@ extern uint8_t getHeartBeatCount(void);
 extern void changeRxLevel(uint8_t neoRxLevel);
 extern void changeTxLevel(uint8_t neoTxLevel);
 
-extern uint8_t *getEmgSampleUnit(void);
 extern uint16_t getEMGCount_OUT(void);
+extern uint16_t getMotionCount_OUT(void);
 extern uint8_t getFPSCount_OUT(void);
 
 /*********************************************************************
